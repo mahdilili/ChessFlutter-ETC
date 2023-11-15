@@ -8,4 +8,9 @@ class BoardControleur {
     bool isWhite = (x+y) % 2 == 0;
     return isWhite;
   }
+
+  bool isInBoard(int row, int col)
+  {
+    return row>=0 && row <= 7 && col >=0 && col <=7;
+  }
 }
