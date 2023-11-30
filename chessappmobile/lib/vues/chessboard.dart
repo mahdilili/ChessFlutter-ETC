@@ -1,4 +1,5 @@
 import 'package:chessappmobile/controleurs/board_controleur.dart';
+import 'package:chessappmobile/controleurs/deadpiece_controleur.dart';
 import 'package:chessappmobile/models/piece.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -26,7 +27,12 @@ class _GameBoardState extends State<GameBoard> {
 
   // La liste des valid moves pour la piece selectionnée
   List<List<int>> validMoves = [];
-  //initialiser le board
+
+
+  //Liste des pièces mangés par le joueur white
+  List<ChessPiece> BlackPieceEaten = [];
+  //Liste des pièces mangés par le joueur noir
+  List<ChessPiece> WhitePieceEaten =[];
 @override
 void initState(){
   super.initState();
@@ -37,8 +43,6 @@ void _initializeBoard(){
     //initialiser le board avec des null
   List<List<ChessPiece?>> newBoard = List.generate(8, (index) =>List.generate(8, (index)=>null));
 
-  //placer aléatoirement des pieces au milieu pour tester
-  newBoard[3][3] = ChessPiece(PieceType: ChessPieceType.queen, isWhite: false, PathToImage: 'lib/images/queen.png');
   for(int i = 0 ; i<8;i++) {
     newBoard[1][i] = ChessPiece(PieceType: ChessPieceType.pawn, isWhite: false,
         PathToImage: 'lib/images/pawn.png');
@@ -77,13 +81,23 @@ void _initializeBoard(){
 
 void PieceSelectionnee(int row, int col){
   setState(() {
-    //selectionner une piece, s'il n'ya aucune piece dans cet index
-    if(board[row][col] != null)
-      {
-        selectedPiece = board[row][col];
-        selectedCol = col;
-        selectedRow = row;
-      }
+    //Pas de pièce selectionne et c'est la premiere selection
+    if(selectedPiece == null && board[row][col] !=null){
+      selectedPiece = board[row][col];
+      selectedRow = row;
+      selectedCol = col;
+    }
+    else if (board[row][col] != null && board[row][col]!.isWhite == selectedPiece!.isWhite){
+      selectedPiece = board[row][col];
+      selectedRow = row;
+      selectedCol = col;
+    }
+
+    // si une pièce est selectionnée et que sa destination est vide on la bouge
+    else if(selectedPiece != null &&
+        validMoves.any((element)=> element[0] == row && element[1] == col)){
+      MovePiece(row,col);
+    }
 
     //si une piece selectionnée, il faut calculer les moves valides
 
@@ -93,12 +107,16 @@ void PieceSelectionnee(int row, int col){
 }
 
 // Calculer les Raw valid Moves
-  List<List<int>> CalculerRawValidMoves(int row, int col, ChessPiece? selectedPiece){
+  List<List<int>> CalculerRawValidMoves(int row, int col, ChessPiece? selectedpiece){
   List<List<int>> playerMoves = [];
     //Les différentes direction selon la couleur du joueur
-    int direction = selectedPiece!.isWhite? -1 : 1;
+  if(selectedpiece == null)
+    {
+      return [];
+    }
+    int direction = selectedpiece!.isWhite? -1 : 1;
 
-    switch (selectedPiece.PieceType)
+    switch (selectedpiece.PieceType)
         {
       case ChessPieceType.pawn:
     //pawn peut se déplacer en avant si le carré est vide
@@ -107,7 +125,7 @@ void PieceSelectionnee(int row, int col){
           playerMoves.add([row+direction, col]);
         }
       // pawn peut se déplcer de deux cases si ils sont dans leurs position initiales
-      if((row == 1 && !selectedPiece.isWhite) || (row ==6 && selectedPiece.isWhite)){
+      if((row == 1 && !selectedpiece.isWhite) || (row ==6 && selectedpiece.isWhite)){
         if(bc.isInBoard(row+2 * direction, col)&& board[row + 2 * direction][col]==null &&
             board[row + direction][col]==null){
           playerMoves.add([row+2*direction, col]);
@@ -143,7 +161,7 @@ void PieceSelectionnee(int row, int col){
             }
             if(board[newRow][newCol] !=null)
               {
-                if(board[newRow][newCol]!.isWhite != selectedPiece.isWhite){
+                if(board[newRow][newCol]!.isWhite != selectedpiece.isWhite){
                   playerMoves.add([newRow,newCol]); //mangable
                 }
                 break; // bloquer
@@ -177,7 +195,7 @@ void PieceSelectionnee(int row, int col){
             }
           if(board[newRow][newCol]!=null)
             {
-              if(board[newRow][newCol]!.isWhite != selectedPiece.isWhite)
+              if(board[newRow][newCol]!.isWhite != selectedpiece.isWhite)
                 {
                   playerMoves.add([newRow,newCol]);
                 }
@@ -206,7 +224,7 @@ void PieceSelectionnee(int row, int col){
               }
               if(board[newRow][newCol]!=null)
                 {
-                  if(board[newRow][newCol]!.isWhite != selectedPiece.isWhite){
+                  if(board[newRow][newCol]!.isWhite != selectedpiece.isWhite){
                     playerMoves.add([newRow,newCol]);
                   }
                   break;
@@ -241,7 +259,7 @@ void PieceSelectionnee(int row, int col){
                   break;
                 }
               if(board[newRow][newCol]!=null){
-                if(board[newRow][newCol]!.isWhite !=selectedPiece.isWhite)
+                if(board[newRow][newCol]!.isWhite !=selectedpiece.isWhite)
                   {
                     playerMoves.add([newRow,newCol]);
                   }
@@ -273,7 +291,7 @@ void PieceSelectionnee(int row, int col){
             }
             if(board[newRow][newCol]!=null)
               {
-                if(board[newRow][newCol]!.isWhite != selectedPiece.isWhite){
+                if(board[newRow][newCol]!.isWhite != selectedpiece.isWhite){
                   playerMoves.add([newRow,newCol]);
                 }
                 continue;
@@ -286,41 +304,83 @@ void PieceSelectionnee(int row, int col){
     }
     return playerMoves;
   }
-  ChessPiece piecePawn = ChessPiece(PieceType:ChessPieceType.pawn, isWhite:false, PathToImage:'lib/images/pawn.png');
+
+  //bouger les pièce
+  void MovePiece(int newRow, int newCol){
+  //Vérifier si la case contient une piece de l'ennemi
+    if(board[newRow][newCol] !=null){
+      var capturedPiece = board[newRow][newCol];
+      if(capturedPiece!.isWhite){
+        WhitePieceEaten.add(capturedPiece);
+      }
+      else{
+        BlackPieceEaten.add(capturedPiece);
+      }
+    }
+
+  //bouger la pièce et libérer sa case
+    board[newRow][newCol] = selectedPiece;
+    board[selectedRow][selectedCol] = null;
+
+    setState(() {
+      selectedPiece = null;
+      selectedCol = -1;
+      selectedRow = -1;
+      validMoves = [];
+    });
+  }
+  //ChessPiece piecePawn = ChessPiece(PieceType:ChessPieceType.pawn, isWhite:false, PathToImage:'lib/images/pawn.png');
   @override
   Widget build(BuildContext context){
     return Scaffold(
       backgroundColor: Colors.grey[600],
-      body: GridView.builder (
-        itemCount: 8*8,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8), //Pour une grille 8 par 8
-          itemBuilder: (context,  index) {
+      body: Column(
+        children: [
+          //Les pieces mangés pour le joueur noir
+          Expanded(child: GridView.builder(itemCount:WhitePieceEaten.length,
+              gridDelegate:SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8),
+              itemBuilder: (context,index)=>DeadPiece(imagePath: WhitePieceEaten[index].PathToImage,
+                  isWhite: false)),),
+          Expanded(
+            flex: 4,
+            child: GridView.builder (
+              itemCount: 8*8,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8), //Pour une grille 8 par 8
+                itemBuilder: (context,  index) {
 
-          int row = index ~/8;
-          int col = index % 8;
+                int row = index ~/8;
+                int col = index % 8;
 
-          //Vérifier si le square est selectionnée ou pas
-          bool isSelected = selectedRow == row && selectedCol == col;
+                //Vérifier si le square est selectionnée ou pas
+                bool isSelected = selectedRow == row && selectedCol == col;
 
-          //vérifier si le square selectionnée est disponible
-          bool isvalidMove= false;
-          for(var position in validMoves)
-            {
-              //Comparer les col et les rows
-              if(position[0]  == row && position[1] == col)
-                {
-                  isvalidMove = true;
-                }
-            }
-            return Square(
-            isWhite: bc.isWhite(index),
-            piece: board[row][col],
-              isSelected: isSelected,
-              isValidMove: isvalidMove,
-              onTap: ()=> PieceSelectionnee(row, col),
-            );
-          },
+                //vérifier si le square selectionnée est disponible
+                bool isvalidMove= false;
+                for(var position in validMoves)
+                  {
+                    //Comparer les col et les rows
+                    if(position[0]  == row && position[1] == col)
+                      {
+                        isvalidMove = true;
+                      }
+                  }
+                  return Square(
+                  isWhite: bc.isWhite(index),
+                  piece: board[row][col],
+                    isSelected: isSelected,
+                    isValidMove: isvalidMove,
+                    onTap: ()=> PieceSelectionnee(row, col),
+                  );
+                },
+            ),
+          ),
+          //Les pieces mangés du joueur blanc
+          Expanded(child: GridView.builder(itemCount:BlackPieceEaten.length,
+              gridDelegate:SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8),
+              itemBuilder: (context,index)=>DeadPiece(imagePath: BlackPieceEaten[index].PathToImage,
+                  isWhite: true)),),
+        ],
       ),
     );
   }
