@@ -33,6 +33,13 @@ class _GameBoardState extends State<GameBoard> {
   List<ChessPiece> BlackPieceEaten = [];
   //Liste des pièces mangés par le joueur noir
   List<ChessPiece> WhitePieceEaten =[];
+
+  bool isWhiteTurn = true;
+
+  List<int> WhiteKingPos = [7,4];
+  List<int> BlackKingPos = [0,4];
+
+  bool checkStatus = false;
 @override
 void initState(){
   super.initState();
@@ -70,11 +77,11 @@ void _initializeBoard(){
 
   //Place queen
   newBoard[0][3] = ChessPiece(PieceType: ChessPieceType.queen, isWhite: false, PathToImage: 'lib/images/queen.png');
-  newBoard[7][4] = ChessPiece(PieceType: ChessPieceType.bishop, isWhite: true, PathToImage: 'lib/images/queen.png');
+  newBoard[7][3] = ChessPiece(PieceType: ChessPieceType.queen, isWhite: true, PathToImage: 'lib/images/queen.png');
 
   //Place kings
   newBoard[0][4] = ChessPiece(PieceType: ChessPieceType.king, isWhite: false, PathToImage: 'lib/images/king.png');
-  newBoard[7][3] = ChessPiece(PieceType: ChessPieceType.king, isWhite: true, PathToImage: 'lib/images/king.png');
+  newBoard[7][4] = ChessPiece(PieceType: ChessPieceType.king, isWhite: true, PathToImage: 'lib/images/king.png');
 
   board = newBoard;
 }
@@ -83,9 +90,11 @@ void PieceSelectionnee(int row, int col){
   setState(() {
     //Pas de pièce selectionne et c'est la premiere selection
     if(selectedPiece == null && board[row][col] !=null){
-      selectedPiece = board[row][col];
-      selectedRow = row;
-      selectedCol = col;
+        if(board[row][col]!.isWhite == isWhiteTurn){
+          selectedPiece = board[row][col];
+          selectedRow = row;
+          selectedCol = col;
+        }
     }
     else if (board[row][col] != null && board[row][col]!.isWhite == selectedPiece!.isWhite){
       selectedPiece = board[row][col];
@@ -101,11 +110,31 @@ void PieceSelectionnee(int row, int col){
 
     //si une piece selectionnée, il faut calculer les moves valides
 
-     validMoves = CalculerRawValidMoves(selectedRow,selectedCol,selectedPiece);
+     validMoves = CalculerRealValidMoves(selectedRow,selectedCol,selectedPiece, true);
   });
 
 }
+List<List<int>> CalculerRealValidMoves(int row, int col , ChessPiece? piece , bool checkSimulation){
 
+  List<List<int>> realValidMove =[];
+  List<List<int>> playerMoves = CalculerRawValidMoves(row, col, piece);
+
+  //filtrer les valid moves pour un résultat de king in a check
+  if(checkSimulation){
+    for(var move in playerMoves){
+      int endRow = move[0];
+      int endCol = move[1];
+      //Stimuler le prochain move pour déterminer s'il est safe
+      if(SimulatedMoveSafe(piece!, row, col, endRow, endCol)){
+        realValidMove.add(move);
+      }
+      else {
+        realValidMove = playerMoves;
+      }
+    }
+  }
+  return realValidMove;
+}
 // Calculer les Raw valid Moves
   List<List<int>> CalculerRawValidMoves(int row, int col, ChessPiece? selectedpiece){
   List<List<int>> playerMoves = [];
@@ -133,11 +162,11 @@ void PieceSelectionnee(int row, int col){
       }
       // pawn peut manger une piece en diagonale
       if(bc.isInBoard(row+direction, col-1)&& board[row+direction][col-1] != null
-      && board[row+direction][col-1]!.isWhite){
+      && board[row+direction][col-1]!.isWhite != selectedpiece.isWhite){
         playerMoves.add([row+direction, col -1]);
       }
       if(bc.isInBoard(row+direction, col+1)&& board[row+direction][col+1] != null
-          && board[row+direction][col+1]!.isWhite){
+          && board[row+direction][col+1]!.isWhite != selectedpiece.isWhite){
         playerMoves.add([row+direction, col +1]);
       }
         break;
@@ -306,8 +335,70 @@ void PieceSelectionnee(int row, int col){
   }
 
   //bouger les pièce
+
+
+  bool KingIsInCheck(bool isWhiteKing){
+    List<int> kingPosition  = isWhiteKing? WhiteKingPos : BlackKingPos;
+
+    for(int i=0 ; i < 8; i++) {
+      for (int k = 0; k < 8; k++) {
+        if (board[i][k] == null || board[i][k]!.isWhite == isWhiteKing){
+          continue;
+        }
+        List<List<int>> piecesValidMoves = CalculerRealValidMoves(i, k, board[i][k], false);
+
+        if(piecesValidMoves.any((move) => move[0] == kingPosition[0]&& move[1] == kingPosition[1])) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+
+  bool SimulatedMoveSafe(ChessPiece piece, int startRow, int startCol, int endRow, int endCol){
+  //sauvegarder le board state
+    ChessPiece? originalDestinationPiece = board[endRow][endCol];
+
+    List<int>? originalKingPosition;
+    if(piece.PieceType == ChessPieceType.king){
+      originalKingPosition = piece.isWhite? WhiteKingPos : BlackKingPos;
+
+      //maj le position du king
+      if(piece.isWhite){
+        WhiteKingPos  = [endRow,endCol];
+      }
+      else {
+        BlackKingPos = [endRow, endCol];
+      }
+    }
+    //si la pièce est un king
+
+    //stimuler le mouvement
+    board[endRow][endCol] = piece;
+    board[startRow][startCol] = null;
+    //vérifier si notre own king est under attack
+    bool kingincheck = KingIsInCheck(piece.isWhite);
+    //restaurer le state original
+    board[startRow][startCol] = piece;
+    board[endRow][endCol] = originalDestinationPiece;
+    //si la pièce était un king, restaurer sa position originale
+    if(piece.PieceType == ChessPieceType.king){
+      if(piece.isWhite){
+        WhiteKingPos = originalKingPosition!;
+      }
+      else {
+        BlackKingPos = originalKingPosition!;
+      }
+    }
+
+    //si le king est en echéc = true, donc pas safe , safe move= false
+    return !kingincheck;
+  }
+  //ChessPiece piecePawn = ChessPiece(PieceType:ChessPieceType.pawn, isWhite:false, PathToImage:'lib/images/pawn.png');
+
   void MovePiece(int newRow, int newCol){
-  //Vérifier si la case contient une piece de l'ennemi
+    //Vérifier si la case contient une piece de l'ennemi
     if(board[newRow][newCol] !=null){
       var capturedPiece = board[newRow][newCol];
       if(capturedPiece!.isWhite){
@@ -318,18 +409,38 @@ void PieceSelectionnee(int row, int col){
       }
     }
 
-  //bouger la pièce et libérer sa case
+    //vérifier si le pièce qui va etre bouger est un king
+    if(selectedPiece!.PieceType == ChessPieceType.king){
+      //mettre a jour les position du king approprié
+      WhiteKingPos = [newRow, newCol];
+    }
+    else {
+      BlackKingPos = [newRow, newCol];
+    }
+
+    //bouger la pièce et libérer sa case
     board[newRow][newCol] = selectedPiece;
     board[selectedRow][selectedCol] = null;
-
+    //checker si le king est en échec
+    if(KingIsInCheck(!isWhiteTurn)){
+      checkStatus = true;
+    }
+    else {
+      checkStatus = false;
+    }
     setState(() {
       selectedPiece = null;
       selectedCol = -1;
       selectedRow = -1;
       validMoves = [];
     });
+
+    //changer le tour du joeur
+    isWhiteTurn = !isWhiteTurn;
+
+
+
   }
-  //ChessPiece piecePawn = ChessPiece(PieceType:ChessPieceType.pawn, isWhite:false, PathToImage:'lib/images/pawn.png');
   @override
   Widget build(BuildContext context){
     return Scaffold(
@@ -340,7 +451,9 @@ void PieceSelectionnee(int row, int col){
           Expanded(child: GridView.builder(itemCount:WhitePieceEaten.length,
               gridDelegate:SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8),
               itemBuilder: (context,index)=>DeadPiece(imagePath: WhitePieceEaten[index].PathToImage,
-                  isWhite: false)),),
+                  isWhite: true)),),
+
+          Text(checkStatus? "CHECK":""),
           Expanded(
             flex: 4,
             child: GridView.builder (
@@ -365,6 +478,7 @@ void PieceSelectionnee(int row, int col){
                         isvalidMove = true;
                       }
                   }
+
                   return Square(
                   isWhite: bc.isWhite(index),
                   piece: board[row][col],
@@ -379,7 +493,7 @@ void PieceSelectionnee(int row, int col){
           Expanded(child: GridView.builder(itemCount:BlackPieceEaten.length,
               gridDelegate:SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8),
               itemBuilder: (context,index)=>DeadPiece(imagePath: BlackPieceEaten[index].PathToImage,
-                  isWhite: true)),),
+                  isWhite: false)),),
         ],
       ),
     );
