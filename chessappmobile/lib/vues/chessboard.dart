@@ -145,11 +145,11 @@ void PieceSelectionnee(int row, int col){
       }
       // pawn peut manger une piece en diagonale
       if(bc.isInBoard(row+direction, col-1)&& board[row+direction][col-1] != null
-      && board[row+direction][col-1]!.isWhite){
+      && board[row+direction][col-1]!.isWhite != piecee.isWhite){
         playerMoves.add([row+direction, col -1]);
       }
       if(bc.isInBoard(row+direction, col+1)&& board[row+direction][col+1] != null
-          && board[row+direction][col+1]!.isWhite){
+          && board[row+direction][col+1]!.isWhite!= piecee.isWhite){
         playerMoves.add([row+direction, col +1]);
       }
         break;
