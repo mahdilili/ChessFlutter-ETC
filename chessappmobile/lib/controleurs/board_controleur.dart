@@ -11,6 +11,6 @@ class BoardControleur {
 
   bool isInBoard(int row, int col)
   {
-    return row>=0 && row <= 7 && col >=0 && col <=7;
+    return row>=0 && row < 8 && col >=0 && col < 8;
   }
 }

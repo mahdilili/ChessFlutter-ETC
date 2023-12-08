@@ -28,18 +28,21 @@ class _GameBoardState extends State<GameBoard> {
   // La liste des valid moves pour la piece selectionnée
   List<List<int>> validMoves = [];
 
+  //liste des pièces blancs qui ont été mangées
+  List<ChessPiece> whitePiecesEaten = [];
+  //liste des pièces noirs qui ont été mangées
+  List<ChessPiece> blackPiecesEaten = [];
 
-  //Liste des pièces mangés par le joueur white
-  List<ChessPiece> BlackPieceEaten = [];
-  //Liste des pièces mangés par le joueur noir
-  List<ChessPiece> WhitePieceEaten =[];
-
+  //déterminer le tour actuel
   bool isWhiteTurn = true;
 
-  List<int> WhiteKingPos = [7,4];
-  List<int> BlackKingPos = [0,4];
+  //position initiale des kings
+  List<int> whiteKingPosition = [7,4];
+  List<int> blackKingPosition = [0,4];
 
   bool checkStatus = false;
+
+  //initialiser le board
 @override
 void initState(){
   super.initState();
@@ -49,6 +52,9 @@ void initState(){
 void _initializeBoard(){
     //initialiser le board avec des null
   List<List<ChessPiece?>> newBoard = List.generate(8, (index) =>List.generate(8, (index)=>null));
+
+
+
 
   for(int i = 0 ; i<8;i++) {
     newBoard[1][i] = ChessPiece(PieceType: ChessPieceType.pawn, isWhite: false,
@@ -88,64 +94,41 @@ void _initializeBoard(){
 
 void PieceSelectionnee(int row, int col){
   setState(() {
-    //Pas de pièce selectionne et c'est la premiere selection
     if(selectedPiece == null && board[row][col] !=null){
-        if(board[row][col]!.isWhite == isWhiteTurn){
-          selectedPiece = board[row][col];
-          selectedRow = row;
-          selectedCol = col;
-        }
+      if(board[row][col]!.isWhite == isWhiteTurn){
+        selectedPiece = board[row][col];
+        selectedRow = row;
+        selectedCol = col;
+      }
     }
-    else if (board[row][col] != null && board[row][col]!.isWhite == selectedPiece!.isWhite){
+
+    else if(board[row][col] != null && board[row][col]!.isWhite == selectedPiece!.isWhite){
       selectedPiece = board[row][col];
       selectedRow = row;
       selectedCol = col;
     }
 
-    // si une pièce est selectionnée et que sa destination est vide on la bouge
-    else if(selectedPiece != null &&
-        validMoves.any((element)=> element[0] == row && element[1] == col)){
-      MovePiece(row,col);
+    // si il ya une piece selectionne et que le joueur clique sur un square valide, on bouge la piece
+    else if(selectedPiece != null && validMoves.any((element) => element[0] == row && element[1] == col)){
+      BougerPiece(row, col);
     }
-
     //si une piece selectionnée, il faut calculer les moves valides
 
-     validMoves = CalculerRealValidMoves(selectedRow,selectedCol,selectedPiece, true);
+     validMoves = CalculerRawValidMoves(selectedRow,selectedCol,selectedPiece);
   });
 
 }
-List<List<int>> CalculerRealValidMoves(int row, int col , ChessPiece? piece , bool checkSimulation){
 
-  List<List<int>> realValidMove =[];
-  List<List<int>> playerMoves = CalculerRawValidMoves(row, col, piece);
-
-  //filtrer les valid moves pour un résultat de king in a check
-  if(checkSimulation){
-    for(var move in playerMoves){
-      int endRow = move[0];
-      int endCol = move[1];
-      //Stimuler le prochain move pour déterminer s'il est safe
-      if(SimulatedMoveSafe(piece!, row, col, endRow, endCol)){
-        realValidMove.add(move);
-      }
-      else {
-        realValidMove = playerMoves;
-      }
-    }
-  }
-  return realValidMove;
-}
 // Calculer les Raw valid Moves
-  List<List<int>> CalculerRawValidMoves(int row, int col, ChessPiece? selectedpiece){
+  List<List<int>> CalculerRawValidMoves(int row, int col, ChessPiece? piecee){
   List<List<int>> playerMoves = [];
+  if(piecee == null){
+    return [];
+  }
     //Les différentes direction selon la couleur du joueur
-  if(selectedpiece == null)
-    {
-      return [];
-    }
-    int direction = selectedpiece!.isWhite? -1 : 1;
+    int direction = piecee.isWhite? -1 : 1;
 
-    switch (selectedpiece.PieceType)
+    switch (piecee.PieceType)
         {
       case ChessPieceType.pawn:
     //pawn peut se déplacer en avant si le carré est vide
@@ -154,7 +137,7 @@ List<List<int>> CalculerRealValidMoves(int row, int col , ChessPiece? piece , bo
           playerMoves.add([row+direction, col]);
         }
       // pawn peut se déplcer de deux cases si ils sont dans leurs position initiales
-      if((row == 1 && !selectedpiece.isWhite) || (row ==6 && selectedpiece.isWhite)){
+      if((row == 1 && !piecee.isWhite) || (row ==6 && piecee.isWhite)){
         if(bc.isInBoard(row+2 * direction, col)&& board[row + 2 * direction][col]==null &&
             board[row + direction][col]==null){
           playerMoves.add([row+2*direction, col]);
@@ -162,11 +145,11 @@ List<List<int>> CalculerRealValidMoves(int row, int col , ChessPiece? piece , bo
       }
       // pawn peut manger une piece en diagonale
       if(bc.isInBoard(row+direction, col-1)&& board[row+direction][col-1] != null
-      && board[row+direction][col-1]!.isWhite != selectedpiece.isWhite){
+      && board[row+direction][col-1]!.isWhite){
         playerMoves.add([row+direction, col -1]);
       }
       if(bc.isInBoard(row+direction, col+1)&& board[row+direction][col+1] != null
-          && board[row+direction][col+1]!.isWhite != selectedpiece.isWhite){
+          && board[row+direction][col+1]!.isWhite){
         playerMoves.add([row+direction, col +1]);
       }
         break;
@@ -190,7 +173,7 @@ List<List<int>> CalculerRealValidMoves(int row, int col , ChessPiece? piece , bo
             }
             if(board[newRow][newCol] !=null)
               {
-                if(board[newRow][newCol]!.isWhite != selectedpiece.isWhite){
+                if(board[newRow][newCol]!.isWhite != piecee.isWhite){
                   playerMoves.add([newRow,newCol]); //mangable
                 }
                 break; // bloquer
@@ -224,7 +207,7 @@ List<List<int>> CalculerRealValidMoves(int row, int col , ChessPiece? piece , bo
             }
           if(board[newRow][newCol]!=null)
             {
-              if(board[newRow][newCol]!.isWhite != selectedpiece.isWhite)
+              if(board[newRow][newCol]!.isWhite != piecee.isWhite)
                 {
                   playerMoves.add([newRow,newCol]);
                 }
@@ -253,7 +236,7 @@ List<List<int>> CalculerRealValidMoves(int row, int col , ChessPiece? piece , bo
               }
               if(board[newRow][newCol]!=null)
                 {
-                  if(board[newRow][newCol]!.isWhite != selectedpiece.isWhite){
+                  if(board[newRow][newCol]!.isWhite != piecee.isWhite){
                     playerMoves.add([newRow,newCol]);
                   }
                   break;
@@ -288,7 +271,7 @@ List<List<int>> CalculerRealValidMoves(int row, int col , ChessPiece? piece , bo
                   break;
                 }
               if(board[newRow][newCol]!=null){
-                if(board[newRow][newCol]!.isWhite !=selectedpiece.isWhite)
+                if(board[newRow][newCol]!.isWhite !=piecee.isWhite)
                   {
                     playerMoves.add([newRow,newCol]);
                   }
@@ -320,7 +303,7 @@ List<List<int>> CalculerRealValidMoves(int row, int col , ChessPiece? piece , bo
             }
             if(board[newRow][newCol]!=null)
               {
-                if(board[newRow][newCol]!.isWhite != selectedpiece.isWhite){
+                if(board[newRow][newCol]!.isWhite != piecee.isWhite){
                   playerMoves.add([newRow,newCol]);
                 }
                 continue;
@@ -334,128 +317,81 @@ List<List<int>> CalculerRealValidMoves(int row, int col , ChessPiece? piece , bo
     return playerMoves;
   }
 
-  //bouger les pièce
+  void BougerPiece(int newRow, int newCol){
 
 
-  bool KingIsInCheck(bool isWhiteKing){
-    List<int> kingPosition  = isWhiteKing? WhiteKingPos : BlackKingPos;
-
-    for(int i=0 ; i < 8; i++) {
-      for (int k = 0; k < 8; k++) {
-        if (board[i][k] == null || board[i][k]!.isWhite == isWhiteKing){
-          continue;
-        }
-        List<List<int>> piecesValidMoves = CalculerRealValidMoves(i, k, board[i][k], false);
-
-        if(piecesValidMoves.any((move) => move[0] == kingPosition[0]&& move[1] == kingPosition[1])) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-
-  bool SimulatedMoveSafe(ChessPiece piece, int startRow, int startCol, int endRow, int endCol){
-  //sauvegarder le board state
-    ChessPiece? originalDestinationPiece = board[endRow][endCol];
-
-    List<int>? originalKingPosition;
-    if(piece.PieceType == ChessPieceType.king){
-      originalKingPosition = piece.isWhite? WhiteKingPos : BlackKingPos;
-
-      //maj le position du king
-      if(piece.isWhite){
-        WhiteKingPos  = [endRow,endCol];
-      }
-      else {
-        BlackKingPos = [endRow, endCol];
-      }
-    }
-    //si la pièce est un king
-
-    //stimuler le mouvement
-    board[endRow][endCol] = piece;
-    board[startRow][startCol] = null;
-    //vérifier si notre own king est under attack
-    bool kingincheck = KingIsInCheck(piece.isWhite);
-    //restaurer le state original
-    board[startRow][startCol] = piece;
-    board[endRow][endCol] = originalDestinationPiece;
-    //si la pièce était un king, restaurer sa position originale
-    if(piece.PieceType == ChessPieceType.king){
-      if(piece.isWhite){
-        WhiteKingPos = originalKingPosition!;
-      }
-      else {
-        BlackKingPos = originalKingPosition!;
-      }
-    }
-
-    //si le king est en echéc = true, donc pas safe , safe move= false
-    return !kingincheck;
-  }
-  //ChessPiece piecePawn = ChessPiece(PieceType:ChessPieceType.pawn, isWhite:false, PathToImage:'lib/images/pawn.png');
-
-  void MovePiece(int newRow, int newCol){
-    //Vérifier si la case contient une piece de l'ennemi
+  //si le nouveau square contient une piece ennemi
     if(board[newRow][newCol] !=null){
       var capturedPiece = board[newRow][newCol];
-      if(capturedPiece!.isWhite){
-        WhitePieceEaten.add(capturedPiece);
-      }
+      if(capturedPiece!.isWhite)
+        {
+          whitePiecesEaten.add(capturedPiece);
+        }
       else{
-        BlackPieceEaten.add(capturedPiece);
+        blackPiecesEaten.add(capturedPiece);
       }
     }
+  //bouger la pièce et libérer sa place
 
-    //vérifier si le pièce qui va etre bouger est un king
-    if(selectedPiece!.PieceType == ChessPieceType.king){
-      //mettre a jour les position du king approprié
-      WhiteKingPos = [newRow, newCol];
-    }
-    else {
-      BlackKingPos = [newRow, newCol];
-    }
-
-    //bouger la pièce et libérer sa case
     board[newRow][newCol] = selectedPiece;
     board[selectedRow][selectedCol] = null;
-    //checker si le king est en échec
-    if(KingIsInCheck(!isWhiteTurn)){
+
+
+    //voir si l'un des kings est en attaque
+
+    if(isKingInCheck(!isWhiteTurn)){
       checkStatus = true;
     }
-    else {
+    else{
       checkStatus = false;
     }
     setState(() {
       selectedPiece = null;
-      selectedCol = -1;
       selectedRow = -1;
+      selectedCol = -1;
       validMoves = [];
     });
 
-    //changer le tour du joeur
+    //changer le tour actuel
     isWhiteTurn = !isWhiteTurn;
-
-
-
   }
+
+bool isKingInCheck(bool isWhiteKing){
+  List<int> kingPosition = isWhiteKing? whiteKingPosition:blackKingPosition;
+
+  //checker si une piece ennemi peut attacker le king
+  for(int i=0 ; i<8 ; i++){
+    for(int j=0 ; j<8 ; j++){
+      if(board[i][j]== null || board[i][j]!.isWhite == isWhiteKing){
+        continue;
+      }
+
+      List<List<int>> pieceValidMoves = CalculerRawValidMoves(i, j, board[i][j]);
+
+      //checker si la position du king est dans la liste des moves valides
+      if(pieceValidMoves.any((element) => element[0] == kingPosition[0] && element[1] == kingPosition[1])){
+        return true;
+      }
+
+    }
+  }
+  return false;
+}
   @override
   Widget build(BuildContext context){
     return Scaffold(
       backgroundColor: Colors.grey[600],
       body: Column(
         children: [
-          //Les pieces mangés pour le joueur noir
-          Expanded(child: GridView.builder(itemCount:WhitePieceEaten.length,
-              gridDelegate:SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8),
-              itemBuilder: (context,index)=>DeadPiece(imagePath: WhitePieceEaten[index].PathToImage,
-                  isWhite: true)),),
+          Expanded(child: GridView.builder(
+            itemCount: whitePiecesEaten.length,
+              gridDelegate:
+              const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8),
+              itemBuilder: (context,index)=>DeadPiece(imagePath: whitePiecesEaten[index].PathToImage, isWhite: true))),
+          Text(checkStatus? "CHECK" :""),
 
-          Text(checkStatus? "CHECK":""),
           Expanded(
-            flex: 4,
+            flex: 3,
             child: GridView.builder (
               itemCount: 8*8,
               physics: const NeverScrollableScrollPhysics(),
@@ -478,7 +414,6 @@ List<List<int>> CalculerRealValidMoves(int row, int col , ChessPiece? piece , bo
                         isvalidMove = true;
                       }
                   }
-
                   return Square(
                   isWhite: bc.isWhite(index),
                   piece: board[row][col],
@@ -489,11 +424,11 @@ List<List<int>> CalculerRealValidMoves(int row, int col , ChessPiece? piece , bo
                 },
             ),
           ),
-          //Les pieces mangés du joueur blanc
-          Expanded(child: GridView.builder(itemCount:BlackPieceEaten.length,
-              gridDelegate:SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8),
-              itemBuilder: (context,index)=>DeadPiece(imagePath: BlackPieceEaten[index].PathToImage,
-                  isWhite: false)),),
+          Expanded(child: GridView.builder(
+              itemCount: blackPiecesEaten.length,
+              gridDelegate:
+              const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8),
+              itemBuilder: (context,index)=>DeadPiece(imagePath: blackPiecesEaten[index].PathToImage, isWhite: false))),
         ],
       ),
     );

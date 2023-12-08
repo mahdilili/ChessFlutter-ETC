@@ -7,6 +7,6 @@ const DeadPiece({super.key, required this.imagePath, required this.isWhite});
 
 @override
   Widget build(BuildContext context){
-  return Image.asset(imagePath, color: isWhite? Colors.white : Colors.black,);
+  return Image.asset(imagePath, color: isWhite? Colors.white54 : Colors.black45,);
 }
 }
