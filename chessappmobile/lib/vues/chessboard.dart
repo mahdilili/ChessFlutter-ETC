@@ -42,6 +42,9 @@ class _GameBoardState extends State<GameBoard> {
 
   bool checkStatus = false;
 
+  bool blackkingincheck = false;
+  bool whitekingincheck = false;
+
   //initialiser le board
 @override
 void initState(){
@@ -376,9 +379,18 @@ void PieceSelectionnee(int row, int col){
 
     if(isKingInCheck(!isWhiteTurn)){
       checkStatus = true;
+      blackkingincheck =true;
     }
+
+    else if (isKingInCheck(isWhiteTurn))
+      {
+        checkStatus = true;
+        whitekingincheck = true;
+      }
     else{
       checkStatus = false;
+      whitekingincheck = false;
+      blackkingincheck = false;
     }
     setState(() {
       selectedPiece = null;
@@ -415,6 +427,10 @@ bool isKingInCheck(bool isWhiteKing){
 
       //checker si la position du king est dans la liste des moves valides
       if(pieceValidMoves.any((element) => element[0] == kingPosition[0] && element[1] == kingPosition[1])){
+        if(isWhiteKing)
+          {
+
+          }
         return true;
       }
 
@@ -536,6 +552,9 @@ bool isKingInCheck(bool isWhiteKing){
                       }
                   }
                   return Square(
+                  isblackkingincheck: blackkingincheck,
+                  iswhitekingincheck: whitekingincheck,
+                  isKingInCheck: checkStatus,
                   isWhite: bc.isWhite(index),
                   piece: board[row][col],
                     isSelected: isSelected,
