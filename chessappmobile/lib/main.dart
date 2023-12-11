@@ -10,7 +10,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp(
+      title: 'Chess Mobile',
       debugShowCheckedModeBanner: false,
       home: GameBoard(),
     );

@@ -114,7 +114,7 @@ void PieceSelectionnee(int row, int col){
     }
     //si une piece selectionnée, il faut calculer les moves valides
 
-     validMoves = CalculerRawValidMoves(selectedRow,selectedCol,selectedPiece);
+     validMoves = CalculerRealValidMoves(selectedRow,selectedCol,selectedPiece, true);
   });
 
 }
@@ -317,6 +317,32 @@ void PieceSelectionnee(int row, int col){
     return playerMoves;
   }
 
+  //Calculer les vrai moves valides
+  List<List<int>> CalculerRealValidMoves(int row, int col , ChessPiece? piecce, bool checkSimulation){
+    List<List<int>> realValidMoves = [];
+
+    List<List<int>> candidateMoves = CalculerRawValidMoves(row, col, piecce);
+
+    //filtrer les mouves qui peuvent génrer un check
+
+    if(checkSimulation){
+      for(var move in candidateMoves){
+        int endRow = move[0];
+        int endCol = move[1];
+
+        //simuler le prochain move pour déterminer s'il est safe ou pas
+        if(simulatedMoveIsSafe(piecce!,row,col,endRow,endCol)){
+          realValidMoves.add(move);
+        }
+      }
+    }
+    else{
+      realValidMoves = candidateMoves;
+    }
+
+    return realValidMoves;
+
+  }
   void BougerPiece(int newRow, int newCol){
 
 
@@ -329,6 +355,15 @@ void PieceSelectionnee(int row, int col){
         }
       else{
         blackPiecesEaten.add(capturedPiece);
+      }
+    }
+
+    if(selectedPiece!.PieceType == ChessPieceType.king){
+      if(selectedPiece!.isWhite){
+        whiteKingPosition = [newRow, newCol];
+      }
+      else {
+        blackKingPosition = [newRow, newCol];
       }
     }
   //bouger la pièce et libérer sa place
@@ -352,6 +387,16 @@ void PieceSelectionnee(int row, int col){
       validMoves = [];
     });
 
+    //check if check mate
+    if(isCheckMate(!isWhiteTurn)){
+      showDialog(context: context, builder: (context)=>AlertDialog(
+        title: const Text("CHECK MATE!"),
+        actions: [
+          //play again
+          TextButton(onPressed: resetGame, child: const Text("Play again"))
+        ],
+      ));
+    }
     //changer le tour actuel
     isWhiteTurn = !isWhiteTurn;
   }
@@ -366,7 +411,7 @@ bool isKingInCheck(bool isWhiteKing){
         continue;
       }
 
-      List<List<int>> pieceValidMoves = CalculerRawValidMoves(i, j, board[i][j]);
+      List<List<int>> pieceValidMoves = CalculerRealValidMoves(i, j, board[i][j], false);
 
       //checker si la position du king est dans la liste des moves valides
       if(pieceValidMoves.any((element) => element[0] == kingPosition[0] && element[1] == kingPosition[1])){
@@ -377,6 +422,82 @@ bool isKingInCheck(bool isWhiteKing){
   }
   return false;
 }
+
+//Stimuler le prochain move pour voir s'il est safe ou pas
+  bool simulatedMoveIsSafe(ChessPiece pice, int startRow, int startCol, int endRow, int endCol){
+    //Sauvegarder le state du board courant
+    ChessPiece? originalDestinationPiece = board[endRow][endCol];
+
+    List<int>? originalKingPosition;
+
+    if(pice.PieceType == ChessPieceType.king){
+      originalKingPosition = pice.isWhite? whiteKingPosition : blackKingPosition;
+
+      //maj la position du king
+
+      if(pice.isWhite){
+        whiteKingPosition = [endRow, endCol];
+      }
+      else{
+        blackKingPosition = [endRow,endCol];
+      }
+    }
+
+    board[endRow][endCol] = pice;
+    board[startRow][startCol] = null;
+
+    bool kingInCheck = isKingInCheck(pice.isWhite);
+
+    board[startRow][startCol] = pice;
+    board[endRow][endCol] = originalDestinationPiece;
+
+    if(pice.PieceType == ChessPieceType.king){
+      if(pice.isWhite){
+        whiteKingPosition = originalKingPosition!;
+      }
+      else{
+        blackKingPosition = originalKingPosition!;
+      }
+    }
+
+    return !kingInCheck;
+  }
+
+  bool isCheckMate(bool iswhiteking){
+   if(!isKingInCheck(iswhiteking)){
+     return false;
+   }
+
+   for(int i=0 ; i< 8; i++){
+     for(int j= 0 ; j<8 ; j++){
+       if(board[i][j] == null || board[i][j]!.isWhite !=iswhiteking){
+         continue;
+       }
+       List<List<int>> piecesValidMoves = CalculerRealValidMoves(i, j, board[i][j], true);
+
+       if(piecesValidMoves.isNotEmpty){
+         return false;
+       }
+     }
+   }
+
+   return true;
+  }
+
+  //Reset to new game
+  void resetGame(){
+  Navigator.pop(context);
+  _initializeBoard();
+  checkStatus = false;
+  whitePiecesEaten.clear();
+  blackPiecesEaten.clear();
+  whiteKingPosition = [7,4];
+  blackKingPosition = [0,4];
+  isWhiteTurn = true;
+  setState(() {
+
+  });
+  }
   @override
   Widget build(BuildContext context){
     return Scaffold(
