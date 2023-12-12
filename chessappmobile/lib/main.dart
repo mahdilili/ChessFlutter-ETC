@@ -3,6 +3,7 @@ import 'package:chessappmobile/controleurs/providers/utilisateur_provider.dart';
 import 'package:chessappmobile/controleurs/utilisateur_controleur.dart';
 import 'package:chessappmobile/database/database.dart';
 import 'package:chessappmobile/vues/chessboard.dart';
+import 'package:chessappmobile/vues/home.dart';
 import 'package:chessappmobile/vues/login.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -80,7 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: _isLoading || utilisateurProvider.isAutheticating
                 ? const CircularProgressIndicator()
                 : utilisateurProvider.isLoggedIn
-                ? GameBoard()
+                ? Home()
                 : const Login(),
           );
         },

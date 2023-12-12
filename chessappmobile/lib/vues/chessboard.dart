@@ -9,7 +9,9 @@ import 'package:provider/provider.dart';
 import '../models/square.dart';
 
 class GameBoard extends StatefulWidget{
- const GameBoard({super.key});
+ final String? whitePlayer;
+ final String? blackplayer;
+  const GameBoard({super.key, this.blackplayer, this.whitePlayer});
 
   @override
   State<GameBoard> createState() => _GameBoardState();
@@ -577,8 +579,11 @@ bool isKingInCheck(bool isWhiteKing){
               gridDelegate:
               const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8),
               itemBuilder: (context,index)=>DeadPiece(imagePath: blackPiecesEaten[index].PathToImage, isWhite: false))),
+
         ],
       ),
     );
   }
+
+
 }

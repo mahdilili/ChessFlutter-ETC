@@ -40,7 +40,7 @@ class Square extends StatelessWidget {
       // Mettez en surbrillance la case en rouge si le roi noir est en échec
       squareColor = Colors.red;
     } else if (isValidMove) {
-      squareColor = Colors.lightBlueAccent;
+      squareColor = Colors.yellow;
     } else {
       squareColor = isWhite ? Colors.grey[400] : Colors.grey[600];
     }

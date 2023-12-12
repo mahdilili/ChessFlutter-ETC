@@ -17,11 +17,13 @@ class DatabaseHandler{
 
   Future<void> initDb() async {
     WidgetsFlutterBinding.ensureInitialized();
+    String path = join(await getDatabasesPath(), 'chess_database.db');
     database = await openDatabase(
-      join(await getDatabasesPath(),'chess_database.db'),
-      version: 4, onCreate: (db, version) async {
+      path,
+      version: 4,
+      onCreate: (db, version) async {
         _initialScript.forEach((script) async => await db.execute(script));
-    }
+      },
     );
   }
 
@@ -45,6 +47,17 @@ class DatabaseHandler{
     FOREIGN KEY(id_utilisateur) REFERENCES Utilisateur(id)
   );
   ''',
+    '''
+    CREATE TABLE Joueur(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nametag TEXT NOT NULL,
+    gameswon INT NOT NULL,
+    gameslost INT NOT NULL,
+    gamesplayed INT NOT NULL,
+    experience INT NOT NULL,
+    level INT NOT NULL
+    )
+    ''',
     '''
   INSERT INTO Role(id, role)
   VALUES('1','admin');
