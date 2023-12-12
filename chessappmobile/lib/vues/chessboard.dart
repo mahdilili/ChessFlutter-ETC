@@ -1,8 +1,10 @@
 import 'package:chessappmobile/controleurs/board_controleur.dart';
 import 'package:chessappmobile/controleurs/deadpiece_controleur.dart';
+import 'package:chessappmobile/controleurs/providers/utilisateur_provider.dart';
 import 'package:chessappmobile/models/piece.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:provider/provider.dart';
 
 import '../models/square.dart';
 
@@ -520,6 +522,12 @@ bool isKingInCheck(bool isWhiteKing){
       backgroundColor: Colors.grey[600],
       body: Column(
         children: [
+          Padding(padding: EdgeInsets.only(left: 260),child: OutlinedButton(
+            onPressed: () async {
+              await Provider.of<UtilisateurProvider>(context, listen: false).logoutAction();
+            }, child: const Text('Se déconnecter'),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.black45, foregroundColor: Colors.blue),
+          ),),
           Expanded(child: GridView.builder(
             itemCount: whitePiecesEaten.length,
               gridDelegate:

@@ -12,11 +12,13 @@ class Login extends StatelessWidget{
   Widget build(BuildContext context){
     return Column(
       children: [
-        ElevatedButton(onPressed: () async{
+        Center(
+
+        child :ElevatedButton(onPressed: () async{
           await Provider.of<UtilisateurProvider>(context, listen:false).loginAction();
         },
             child: const Text("Login")
-        ),
+        ),),
         Consumer<UtilisateurProvider>(
           builder:(context, utilisateurProvider, child){
             return Text(utilisateurProvider.errorMessage);
