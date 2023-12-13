@@ -32,4 +32,32 @@ class JoueurControleur{
 
     return joueur;
   }
+
+  Future<void> sauvegarderGameStats(Joueur whitePlayer, Joueur blackPlayer, bool isWhiteWinner) async {
+    var db = DatabaseHandler();
+    print("Saved game " + whitePlayer.nameTag + " vs " + blackPlayer.nameTag);
+
+    if (isWhiteWinner) {
+      whitePlayer.experience = (whitePlayer.experience ?? 0) + 100;
+      whitePlayer.gameswon = (whitePlayer.gameswon ?? 0) + 1;
+      whitePlayer.gamesplayed = (whitePlayer.gamesplayed ?? 0) + 1;
+
+      blackPlayer.gamesplayed = (blackPlayer.gamesplayed ?? 0) + 1;
+      blackPlayer.gameslost = (blackPlayer.gameslost ?? 0) + 1;
+      blackPlayer.experience = (blackPlayer.experience ?? 0) + 30;
+    } else {
+      whitePlayer.experience = (whitePlayer.experience ?? 0) + 30;
+      whitePlayer.gameslost = (whitePlayer.gameslost ?? 0) + 1;
+      whitePlayer.gamesplayed = (whitePlayer.gamesplayed ?? 0) + 1;
+
+      blackPlayer.gamesplayed = (blackPlayer.gamesplayed ?? 0) + 1;
+      blackPlayer.gameslost = (blackPlayer.gameslost ?? 0) + 1;
+      blackPlayer.experience = (blackPlayer.experience ?? 0) + 100;
+    }
+
+    await db.database?.update('Joueur', whitePlayer.toMap(), where: 'id = ?', whereArgs: [whitePlayer.id]);
+    await db.database?.update('Joueur', blackPlayer.toMap(), where: 'id = ?', whereArgs: [blackPlayer.id]);
+  }
+
+
 }

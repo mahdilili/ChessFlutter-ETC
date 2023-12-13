@@ -1,21 +1,26 @@
 import 'package:chessappmobile/controleurs/board_controleur.dart';
 import 'package:chessappmobile/controleurs/deadpiece_controleur.dart';
+import 'package:chessappmobile/controleurs/joueur_controleur.dart';
 import 'package:chessappmobile/controleurs/providers/utilisateur_provider.dart';
 import 'package:chessappmobile/models/piece.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
+import '../models/joueur.dart';
 import '../models/square.dart';
 
 class GameBoard extends StatefulWidget{
- final String? whitePlayer;
- final String? blackplayer;
-  const GameBoard({super.key, this.blackplayer, this.whitePlayer});
+  final String? whitePlayer;
+  final String? blackplayer;
+  final int? whitePlayerId;
+  final int? blackPlayerId;
+  const GameBoard({super.key, this.blackplayer, this.whitePlayer, this.whitePlayerId, this.blackPlayerId});
 
   @override
   State<GameBoard> createState() => _GameBoardState();
-}
+  }
+
   BoardControleur bc = BoardControleur();
 
 class _GameBoardState extends State<GameBoard> {
@@ -49,6 +54,7 @@ class _GameBoardState extends State<GameBoard> {
   bool blackkingincheck = false;
   bool whitekingincheck = false;
 
+  var jc = JoueurControleur();
   //initialiser le board
 @override
 void initState(){
@@ -405,11 +411,29 @@ void PieceSelectionnee(int row, int col){
 
     //check if check mate
     if(isCheckMate(!isWhiteTurn)){
+      String winnertext = isWhiteTurn ? "White player win" : "Black player win";
       showDialog(context: context, builder: (context)=>AlertDialog(
-        title: const Text("CHECK MATE!"),
+        title:  Text(winnertext),
         actions: [
           //play again
-          TextButton(onPressed: resetGame, child: const Text("Play again"))
+          TextButton(
+            onPressed: () async{
+
+              if (checkStatus && isWhiteTurn) {
+                Joueur? wplayer = await jc.getJoueurById(int.parse(widget.whitePlayer!.substring(0, 1)));
+                Joueur? bplayer = await jc.getJoueurById(int.parse(widget.blackplayer!.substring(0,1)));
+                jc.sauvegarderGameStats(wplayer, bplayer, false );
+              }
+              else {
+                Joueur? wplayer = await jc.getJoueurById(int.parse(widget.whitePlayer!.substring(0, 1)));
+                Joueur? bplayer = await jc.getJoueurById(int.parse(widget.blackplayer!.substring(0,1)));
+                jc.sauvegarderGameStats(wplayer, bplayer, true );
+              }
+              resetGame();
+            },
+            child: const Text("Play again"),
+          )
+
         ],
       ));
     }
@@ -519,71 +543,98 @@ bool isKingInCheck(bool isWhiteKing){
   });
   }
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text("Partie")),
       backgroundColor: Colors.grey[600],
       body: Column(
         children: [
-          Padding(padding: EdgeInsets.only(left: 260),child: OutlinedButton(
-            onPressed: () async {
-              await Provider.of<UtilisateurProvider>(context, listen: false).logoutAction();
-            }, child: const Text('Se déconnecter'),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.black45, foregroundColor: Colors.blue),
-          ),),
-          Expanded(child: GridView.builder(
-            itemCount: whitePiecesEaten.length,
-              gridDelegate:
-              const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8),
-              itemBuilder: (context,index)=>DeadPiece(imagePath: whitePiecesEaten[index].PathToImage, isWhite: true))),
-          Text(checkStatus? "CHECK" :""),
-
+          Padding(
+            padding: EdgeInsets.only(left: 260),
+            child: OutlinedButton(
+              onPressed: () async {
+                await Provider.of<UtilisateurProvider>(context, listen: false).logoutAction();
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+              child: const Text('Se déconnecter'),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.black45, foregroundColor: Colors.blue),
+            ),
+          ),
           Expanded(
-            flex: 3,
-            child: GridView.builder (
-              itemCount: 8*8,
+            child: GridView.builder(
+              itemCount: whitePiecesEaten.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8),
+              itemBuilder: (context, index) => DeadPiece(imagePath: whitePiecesEaten[index].PathToImage, isWhite: true),
+            ),
+          ),
+          Text(checkStatus ? "CHECK" : ""),
+          Padding(
+            padding: const EdgeInsets.only(right: 240),
+            child: Text(
+              'Joueur noir ${widget.blackplayer!.substring(2,widget.blackplayer!.length) ?? "Non défini"}',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 4,
+            child: GridView.builder(
+              itemCount: 8 * 8,
               physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8), //Pour une grille 8 par 8
-                itemBuilder: (context,  index) {
-
-                int row = index ~/8;
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8), // Pour une grille 8 par 8
+              itemBuilder: (context, index) {
+                int row = index ~/ 8;
                 int col = index % 8;
 
-                //Vérifier si le square est selectionnée ou pas
+                // Vérifier si le square est sélectionné ou pas
                 bool isSelected = selectedRow == row && selectedCol == col;
 
-                //vérifier si le square selectionnée est disponible
-                bool isvalidMove= false;
-                for(var position in validMoves)
-                  {
-                    //Comparer les col et les rows
-                    if(position[0]  == row && position[1] == col)
-                      {
-                        isvalidMove = true;
-                      }
+                // Vérifier si le square sélectionné est disponible
+                bool isValidMove = false;
+                for (var position in validMoves) {
+                  // Comparer les colonnes et les rangées
+                  if (position[0] == row && position[1] == col) {
+                    isValidMove = true;
                   }
-                  return Square(
+                }
+                return Square(
                   isblackkingincheck: blackkingincheck,
                   iswhitekingincheck: whitekingincheck,
                   isKingInCheck: checkStatus,
                   isWhite: bc.isWhite(index),
                   piece: board[row][col],
-                    isSelected: isSelected,
-                    isValidMove: isvalidMove,
-                    onTap: ()=> PieceSelectionnee(row, col),
-                  );
-                },
+                  isSelected: isSelected,
+                  isValidMove: isValidMove,
+                  onTap: () => PieceSelectionnee(row, col),
+                );
+              },
             ),
           ),
-          Expanded(child: GridView.builder(
+          Padding(
+            padding: const EdgeInsets.only(right: 225,bottom: 40),
+            child: Text(
+              'Joueur Blanc ${widget.whitePlayer!.substring(2,widget.whitePlayer!.length) ?? "Non défini"}',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+              ),
+            ),
+          ),
+          Expanded(
+            child: GridView.builder(
               itemCount: blackPiecesEaten.length,
-              gridDelegate:
-              const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8),
-              itemBuilder: (context,index)=>DeadPiece(imagePath: blackPiecesEaten[index].PathToImage, isWhite: false))),
-
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8),
+              itemBuilder: (context, index) => DeadPiece(imagePath: blackPiecesEaten[index].PathToImage, isWhite: false),
+            ),
+          ),
         ],
       ),
     );
   }
+
 
 
 }

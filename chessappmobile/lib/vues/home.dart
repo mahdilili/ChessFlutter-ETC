@@ -19,65 +19,84 @@ class Home extends StatefulWidget{
   State<Home> createState()=> HomeState();
 }
 
-class HomeState extends State<Home> with TickerProviderStateMixin{
+class HomeState extends State<Home> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
-    return AnimatedBackground(
-      behaviour: RandomParticleBehaviour(
-        options: const ParticleOptions(
-          spawnMaxRadius: 50.00,
-          spawnMinSpeed: 10.00,
-          particleCount: 30,
-          spawnMaxSpeed: 50,
-          minOpacity: 0.3,
-          spawnOpacity: 0.4,
-          baseColor: Colors.white60
-        )
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Chess Mobile'),
       ),
-      vsync: this,
-    child: Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-    Container(height: 70,
-      child: ElevatedButton(
-        style: ButtonStyle(shape:MaterialStateProperty.all<RoundedRectangleBorder>(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0),side: BorderSide(color: Colors.white54))
-        )),
-      onPressed: () => _dialogCreateGame(context),
-      child: Text("Créer une nouvelle partie", style: TextStyle(fontSize: 25),),
+      drawer: _buildDrawer(context), // Ajouter le Drawer ici
+      body: AnimatedBackground(
+          behaviour: RandomParticleBehaviour(
+              options: const ParticleOptions(
+                  spawnMaxRadius: 50.00,
+                  spawnMinSpeed: 10.00,
+                  particleCount: 30,
+                  spawnMaxSpeed: 50,
+                  minOpacity: 0.3,
+                  spawnOpacity: 0.4,
+                  baseColor: Colors.white60
+              )
+          ),
+          vsync: this,
+        child: Text(''),
+        // Le reste de votre code reste inchangé
       ),
-    ),
-    SizedBox(height: 5), // Espacement entre les boutons
-    Container(height: 70,
-      child: ElevatedButton(
-        style: ButtonStyle(shape:MaterialStateProperty.all<RoundedRectangleBorder>(
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0),side: BorderSide(color: Colors.white54))
-        )),
-      onPressed: () => _dialogBuilder(context),
-      child: Text('Créer un joueur', style: TextStyle(fontSize: 25),),
-      ),
-    ),
-    SizedBox(height: 5), // Espacement entre les boutons
-    Container(height: 70,
-      child: ElevatedButton(
-        style: ButtonStyle(shape:MaterialStateProperty.all<RoundedRectangleBorder>(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0),side: BorderSide(color: Colors.white54))
-        )),
-      onPressed: () {
-      if (Platform.isAndroid) {
-      SystemNavigator.pop();
-      } else if (Platform.isIOS) {
-      exit(0);
-      }
-      },
-      child: Text('Quitter', style: TextStyle(fontSize: 25),),
-      ),
-    ),
-    ],
-    ));
-
+    );
   }
+
+  Widget _buildDrawer(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        children: [
+          DrawerHeader(
+
+            decoration: BoxDecoration(
+
+              color: Colors.blue,
+            ),
+            child: Text(
+              'Menu',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+              ),
+            ),
+          ),
+          ListTile(
+            title: Text('Créer une nouvelle partie'),
+            onTap: () {
+              _dialogCreateGame(context);
+              Navigator.pop(context); // Fermer le Drawer après avoir sélectionné une option
+            },
+          ),
+          ListTile(
+            title: Text('Créer un joueur'),
+            onTap: () {
+              _dialogBuilder(context);
+              Navigator.pop(context); // Fermer le Drawer après avoir sélectionné une option
+            },
+          ),
+          ListTile(
+            title: Text('Quitter'),
+            onTap: () {
+              if (Platform.isAndroid) {
+                SystemNavigator.pop();
+              } else if (Platform.isIOS) {
+                exit(0);
+              }
+            },
+          ),
+          // Vous pouvez ajouter d'autres options de menu ici
+        ],
+      ),
+    );
+  }
+
+// Le reste de votre code reste inchangé
+}
+
 Future<void> _dialogCreateGame(BuildContext context) async{
   DatabaseHandler db = DatabaseHandler();
 
@@ -111,15 +130,18 @@ Future<void> _dialogCreateGame(BuildContext context) async{
                         child: DropdownButton(
                           icon: null,
                           elevation: 16,
-                          items: NomJoueurs.map<DropdownMenuItem<String>>(
+                          items: NomJoueurs.where((element) => element !=deuxiemejoueur)
+                              .map<DropdownMenuItem<String>>(
                                 (String value) {
+
                               return DropdownMenuItem<String>(
                                 value: value,
                                 child: Padding(
-                                  padding: const EdgeInsets.only(left: 15),
+                                  padding: const EdgeInsets.only(left: 1),
                                   child: Align(child: Text(value)),
                                 ),
                               );
+
                             },
                           ).toList(),
                           onChanged: (String? newValue) {
@@ -130,6 +152,7 @@ Future<void> _dialogCreateGame(BuildContext context) async{
                           value: premierjoueur,
                         ),
                       ),
+
                       Padding(
                         padding: const EdgeInsets.only(left: 15, right: 15),
                         child: const Text(
@@ -141,12 +164,14 @@ Future<void> _dialogCreateGame(BuildContext context) async{
                         child: DropdownButton(
                           icon: null,
                           elevation: 16,
-                          items: NomJoueurs.map<DropdownMenuItem<String>>(
+                          items: NomJoueurs
+                              .where((value) => value != premierjoueur)
+                              .map<DropdownMenuItem<String>>(
                                 (String value) {
                               return DropdownMenuItem<String>(
                                 value: value,
                                 child: Padding(
-                                  padding: const EdgeInsets.only(left: 15),
+                                  padding: const EdgeInsets.only(left: 1),
                                   child: Align(child: Text(value)),
                                 ),
                               );
@@ -160,16 +185,26 @@ Future<void> _dialogCreateGame(BuildContext context) async{
                           value: deuxiemejoueur,
                         ),
                       ),
+
                     ],
                   ),
                   const SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: () {
-                      // Ajoutez ici le code pour gérer le bouton
-                      Navigator.of(context).pop();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => GameBoard(
+                            whitePlayer: premierjoueur,
+                            blackplayer: deuxiemejoueur,
+
+                          ),
+                        ),
+                      );
                     },
                     child: const Text('Créer'),
                   ),
+
                 ],
               ),
             ),
@@ -251,4 +286,3 @@ Future<void> _dialogCreateGame(BuildContext context) async{
       },
     );
   }
-}

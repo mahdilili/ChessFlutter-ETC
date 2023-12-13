@@ -2,17 +2,18 @@
 
 class Joueur{
 
-  const Joueur({this.id, required this.nameTag,  this.experience,this.gamesplayed,this.gameslost,
+   Joueur({this.id, required this.nameTag,  this.experience,this.gamesplayed,this.gameslost,
   this.gameswon, this.level});
 
-  final int? id;
-  final String nameTag;
+   int? id;
+   String nameTag;
 
-  final int? gamesplayed;
-  final int? gameswon;
-  final int? gameslost;
-  final int? experience;
-  final int? level;
+   int? gamesplayed;
+   int? gameswon;
+   int? gameslost;
+   int? experience;
+
+   int? level;
 
 
   Map<String, dynamic> toMap(){
@@ -38,6 +39,6 @@ class Joueur{
 
   @override
   String toString(){
-    return '$nameTag';
+    return '$id: ' + '$nameTag';
   }
 }
