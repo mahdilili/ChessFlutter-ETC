@@ -10,6 +10,7 @@ class Square extends StatelessWidget {
   final ChessPiece? piece;
   final bool iswhitekingincheck;
   final bool isblackkingincheck;
+  final String? selectedPath;
 
   const Square({
     super.key,
@@ -21,6 +22,7 @@ class Square extends StatelessWidget {
     required this.isblackkingincheck,
     required this.onTap,
     required this.isValidMove,
+    required this.selectedPath,
   });
 
   @override
@@ -42,7 +44,25 @@ class Square extends StatelessWidget {
     } else if (isValidMove) {
       squareColor = Colors.yellow;
     } else {
-      squareColor = isWhite ? Colors.grey[400] : Colors.grey[600];
+      if(selectedPath!=null && selectedPath!.contains('/')) {
+        int indexdebut = selectedPath!.lastIndexOf('/');
+        int indexfin = selectedPath!.lastIndexOf('.');
+        String skin = selectedPath!.substring(indexdebut + 1, indexfin);
+
+        if (skin == "board1") {
+          squareColor = isWhite ? Colors.red[200] : Colors.amberAccent[100];
+        }
+        else if(skin == "board2"){
+          squareColor = isWhite ? Colors.brown[400] : Colors.orange[500];
+        }
+        else {
+          squareColor = isWhite ? Colors.grey[400] : Colors.grey[600];
+        }
+      }
+      else {
+        squareColor = isWhite ? Colors.grey[400] : Colors.grey[600];
+
+      }
     }
 
 

@@ -1,3 +1,4 @@
+import 'package:chessappmobile/vues/home.dart';
 import 'package:flutter/material.dart';
 
 class Skins extends StatefulWidget {
@@ -59,7 +60,9 @@ class _SkinsState extends State<Skins> {
           ElevatedButton(
             onPressed: () {
               // TODO: Envoyer le chemin du skin à la classe GameBoard
-              Navigator.pop(context, selectedSkinPath);
+              Navigator.pop(context);
+              Navigator.pop(context);
+              Navigator.push(context,MaterialPageRoute(builder: (context)=> Home(selectedSkinPath: selectedSkinPath,)));
             },
             child: Text('Appliquer le skin'),
           ),

@@ -1,100 +1,122 @@
+import 'package:flutter/material.dart';
 import 'dart:io';
 
 import 'package:animated_background/animated_background.dart';
-import 'package:chessappmobile/controleurs/joueur_controleur.dart';
-import 'package:chessappmobile/controleurs/providers/utilisateur_provider.dart';
-import 'package:chessappmobile/database/database.dart';
-import 'package:chessappmobile/vues/chessboard.dart';
-import 'package:chessappmobile/vues/skins.dart';
-import 'package:chessappmobile/vues/stats.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import '../controleurs/providers/utilisateur_provider.dart';
+import '../database/database.dart';
 import '../models/joueur.dart';
+import '../controleurs/joueur_controleur.dart';
+import '../vues/chessboard.dart';
+import '../vues/skins.dart';
+import '../vues/stats.dart';
 
-class Home extends StatefulWidget{
+class Home extends StatefulWidget {
+  final String? selectedSkinPath; // New parameter for selected skin path
+
+  Home({Key? key, this.selectedSkinPath}) : super(key: key);
 
   @override
-  State<Home> createState()=> HomeState();
+  State<Home> createState() => HomeState();
 }
 
-class HomeState extends State<Home> with TickerProviderStateMixin{
-
+class HomeState extends State<Home> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
-
     final utilisateurProvider = Provider.of<UtilisateurProvider>(context);
 
-
     return Scaffold(
-      appBar: AppBar(title: Text('Chess App'),
+      appBar: AppBar(
+        title: Text('Chess App'),
         actions: [
-          IconButton(onPressed: () async{
-            await utilisateurProvider.logoutAction();
-
-          }, icon: Icon(Icons.logout))
+          IconButton(
+            onPressed: () async {
+              await utilisateurProvider.logoutAction();
+            },
+            icon: Icon(Icons.logout),
+          )
         ],
       ),
       drawer: _buildDrawer(context),
-      body:   AnimatedBackground(
-    behaviour: RandomParticleBehaviour(
-    options: const ParticleOptions(
-        spawnMaxRadius: 50.00,
-        spawnMinSpeed: 10.00,
-        particleCount: 30,
-        spawnMaxSpeed: 50,
-        minOpacity: 0.3,
-        spawnOpacity: 0.4,
-        baseColor: Colors.white60
-    )
-    ),
-    vsync: this,
-    child: Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-    Container(height: 70,
-    child: ElevatedButton(
-    style: ButtonStyle(shape:MaterialStateProperty.all<RoundedRectangleBorder>(
-    RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0),side: BorderSide(color: Colors.white54))
-    )),
-    onPressed: () => _dialogCreateGame(context),
-    child: Text("Créer une nouvelle partie", style: TextStyle(fontSize: 25),),
-    ),
-    ),
-    SizedBox(height: 5), // Espacement entre les boutons
-    Container(height: 70,
-    child: ElevatedButton(
-    style: ButtonStyle(shape:MaterialStateProperty.all<RoundedRectangleBorder>(
-    RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0),side: BorderSide(color: Colors.white54))
-    )),
-    onPressed: () => _dialogBuilder(context),
-    child: Text('Créer un profil joueur', style: TextStyle(fontSize: 25),),
-    ),
-    ),
-    SizedBox(height: 5), // Espacement entre les boutons
-    Container(height: 70,
-    child: ElevatedButton(
-    style: ButtonStyle(shape:MaterialStateProperty.all<RoundedRectangleBorder>(
-    RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0),side: BorderSide(color: Colors.white54))
-    )),
-    onPressed: () {
-    if (Platform.isAndroid) {
-    SystemNavigator.pop();
-    } else if (Platform.isIOS) {
-    exit(0);
-    }
-    },
-    child: Text('Quitter', style: TextStyle(fontSize: 25),),
-    ),
-    ),
-    ],
-    ),),);
-
+      body: AnimatedBackground(
+        behaviour: RandomParticleBehaviour(
+          options: const ParticleOptions(
+              spawnMaxRadius: 50.00,
+              spawnMinSpeed: 10.00,
+              particleCount: 30,
+              spawnMaxSpeed: 50,
+              minOpacity: 0.3,
+              spawnOpacity: 0.4,
+              baseColor: Colors.white60),
+        ),
+        vsync: this,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              height: 70,
+              child: ElevatedButton(
+                style: ButtonStyle(
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18.0),
+                        side: BorderSide(color: Colors.white54)),
+                  ),
+                ),
+                onPressed: () => _dialogCreateGame(context),
+                child: Text(
+                  "Créer une nouvelle partie",
+                  style: TextStyle(fontSize: 25),
+                ),
+              ),
+            ),
+            SizedBox(height: 5), // Espacement entre les boutons
+            Container(
+              height: 70,
+              child: ElevatedButton(
+                style: ButtonStyle(
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18.0),
+                        side: BorderSide(color: Colors.white54)),
+                  ),
+                ),
+                onPressed: () => _dialogBuilder(context),
+                child: Text(
+                  'Créer un profil joueur',
+                  style: TextStyle(fontSize: 25),
+                ),
+              ),
+            ),
+            SizedBox(height: 5), // Espacement entre les boutons
+            Container(
+              height: 70,
+              child: ElevatedButton(
+                style: ButtonStyle(
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18.0),
+                        side: BorderSide(color: Colors.white54)),
+                  ),
+                ),
+                onPressed: () {
+                  if (Platform.isAndroid) {
+                    SystemNavigator.pop();
+                  } else if (Platform.isIOS) {
+                    exit(0);
+                  }
+                },
+                child: Text('Quitter', style: TextStyle(fontSize: 25)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
-
 
   Widget _buildDrawer(BuildContext context) {
     final utilisateurProvider = Provider.of<UtilisateurProvider>(context);
@@ -121,15 +143,18 @@ class HomeState extends State<Home> with TickerProviderStateMixin{
             title: Text('Profile Stats'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (context) => Stats()));
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => Stats()));
             },
           ),
-          if (utilisateurProvider.isLoggedIn && utilisateurProvider.hasRole('admin'))
+          if (utilisateurProvider.isLoggedIn &&
+              utilisateurProvider.hasRole('admin'))
             ListTile(
               title: Text('Skins'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => Skins()));
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (context) => Skins()));
               },
             ),
           // Vous pouvez ajouter d'autres options de menu ici
@@ -138,19 +163,18 @@ class HomeState extends State<Home> with TickerProviderStateMixin{
     );
   }
 
-
-  Future<void> _dialogCreateGame(BuildContext context) async{
+  Future<void> _dialogCreateGame(BuildContext context) async {
     DatabaseHandler db = DatabaseHandler();
 
     String? premierjoueur;
     String? deuxiemejoueur;
-    List<Map<String,dynamic>>? listeJoeurs = await db.database?.query("Joueur");
-    List<String> NomJoueurs=[];
+    List<Map<String, dynamic>>? listeJoeurs =
+    await db.database?.query("Joueur");
+    List<String> NomJoueurs = [];
 
-    for(Map<String,dynamic> joueur in listeJoeurs!){
+    for (Map<String, dynamic> joueur in listeJoeurs!) {
       NomJoueurs.add(Joueur.fromMap(joueur).toString());
     }
-
 
     return showDialog<void>(
       context: context,
@@ -172,10 +196,10 @@ class HomeState extends State<Home> with TickerProviderStateMixin{
                           child: DropdownButton(
                             icon: null,
                             elevation: 16,
-                            items: NomJoueurs.where((element) => element !=deuxiemejoueur)
+                            items: NomJoueurs
+                                .where((element) => element != deuxiemejoueur)
                                 .map<DropdownMenuItem<String>>(
                                   (String value) {
-
                                 return DropdownMenuItem<String>(
                                   value: value,
                                   child: Padding(
@@ -183,7 +207,6 @@ class HomeState extends State<Home> with TickerProviderStateMixin{
                                     child: Align(child: Text(value)),
                                   ),
                                 );
-
                               },
                             ).toList(),
                             onChanged: (String? newValue) {
@@ -194,7 +217,6 @@ class HomeState extends State<Home> with TickerProviderStateMixin{
                             value: premierjoueur,
                           ),
                         ),
-
                         Padding(
                           padding: const EdgeInsets.only(left: 15, right: 15),
                           child: const Text(
@@ -227,7 +249,6 @@ class HomeState extends State<Home> with TickerProviderStateMixin{
                             value: deuxiemejoueur,
                           ),
                         ),
-
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -235,21 +256,26 @@ class HomeState extends State<Home> with TickerProviderStateMixin{
                       padding: const EdgeInsets.only(top: 10.0),
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => GameBoard(
-                                whitePlayer: premierjoueur,
-                                blackplayer: deuxiemejoueur,
-
+                          if (premierjoueur != null &&
+                              deuxiemejoueur != null) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => GameBoard(
+                                  whitePlayer: premierjoueur,
+                                  blackplayer: deuxiemejoueur,
+                                  selectedSkinPath: widget.selectedSkinPath ?? " ",
+                                ),
                               ),
-                            ),
-                          );
+                            );
+                          } else {
+                            // Afficher une alerte si les joueurs ne sont pas sélectionnés
+                            _showAlert(context);
+                          }
                         },
                         child: const Text('Créer'),
                       ),
                     ),
-
                   ],
                 ),
               ),
@@ -258,7 +284,6 @@ class HomeState extends State<Home> with TickerProviderStateMixin{
         });
       },
     );
-
   }
 
   Future<void> _dialogBuilder(BuildContext context) async {
@@ -332,4 +357,20 @@ class HomeState extends State<Home> with TickerProviderStateMixin{
     );
   }
 
+
+  void _showAlert(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Sélectionnez deux joueurs'),
+        content: Text('Veuillez sélectionner deux joueurs pour commencer le jeu.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
 }

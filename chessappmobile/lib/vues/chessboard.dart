@@ -15,7 +15,8 @@ class GameBoard extends StatefulWidget{
   final String? blackplayer;
   final int? whitePlayerId;
   final int? blackPlayerId;
-  const GameBoard({super.key, this.blackplayer, this.whitePlayer, this.whitePlayerId, this.blackPlayerId});
+  final String? selectedSkinPath;
+  const GameBoard({super.key, this.blackplayer, this.whitePlayer, this.whitePlayerId, this.blackPlayerId, this.selectedSkinPath});
 
   @override
   State<GameBoard> createState() => _GameBoardState();
@@ -607,6 +608,7 @@ bool isKingInCheck(bool isWhiteKing){
                   isWhite: bc.isWhite(index),
                   piece: board[row][col],
                   isSelected: isSelected,
+                  selectedPath: widget.selectedSkinPath ?? " ",
                   isValidMove: isValidMove,
                   onTap: () => PieceSelectionnee(row, col),
                 );
