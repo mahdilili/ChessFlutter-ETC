@@ -51,7 +51,7 @@ class JoueurControleur{
       whitePlayer.gamesplayed = (whitePlayer.gamesplayed ?? 0) + 1;
 
       blackPlayer.gamesplayed = (blackPlayer.gamesplayed ?? 0) + 1;
-      blackPlayer.gameslost = (blackPlayer.gameslost ?? 0) + 1;
+      blackPlayer.gameswon = (blackPlayer.gameswon ?? 0) + 1;
       blackPlayer.experience = (blackPlayer.experience ?? 0) + 100;
     }
 

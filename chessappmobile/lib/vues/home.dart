@@ -5,6 +5,7 @@ import 'package:chessappmobile/controleurs/joueur_controleur.dart';
 import 'package:chessappmobile/controleurs/providers/utilisateur_provider.dart';
 import 'package:chessappmobile/database/database.dart';
 import 'package:chessappmobile/vues/chessboard.dart';
+import 'package:chessappmobile/vues/stats.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,11 +20,21 @@ class Home extends StatefulWidget{
 }
 
 class HomeState extends State<Home> with TickerProviderStateMixin{
+
   @override
   Widget build(BuildContext context) {
 
+    final utilisateurProvider = Provider.of<UtilisateurProvider>(context);
+
+
     return Scaffold(
       appBar: AppBar(title: Text('Chess App'),
+        actions: [
+          IconButton(onPressed: () async{
+            await utilisateurProvider.logoutAction();
+
+          }, icon: Icon(Icons.logout))
+        ],
       ),
       drawer: _buildDrawer(context),
       body:   AnimatedBackground(
@@ -59,7 +70,7 @@ class HomeState extends State<Home> with TickerProviderStateMixin{
     RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0),side: BorderSide(color: Colors.white54))
     )),
     onPressed: () => _dialogBuilder(context),
-    child: Text('Créer un joueur', style: TextStyle(fontSize: 25),),
+    child: Text('Créer un profil joueur', style: TextStyle(fontSize: 25),),
     ),
     ),
     SizedBox(height: 5), // Espacement entre les boutons
@@ -107,8 +118,16 @@ class HomeState extends State<Home> with TickerProviderStateMixin{
           ListTile(
             title: Text('Profile Stats'),
             onTap: () {
-              _dialogCreateGame(context);
-              Navigator.pop(context); // Fermer le Drawer après avoir sélectionné une option
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (context)=> Stats()));
+               // Fermer le Drawer après avoir sélectionné une option
+            },
+          ),
+          ListTile(
+            title: Text('Skins'),
+            onTap: () {
+
+              // Fermer le Drawer après avoir sélectionné une option
             },
           ),
           // Vous pouvez ajouter d'autres options de menu ici
@@ -245,17 +264,23 @@ class HomeState extends State<Home> with TickerProviderStateMixin{
 
     final NameTagControleur = TextEditingController();
 
+    // Récupérez la hauteur de la barre de statut
+    double statusBarHeight = MediaQuery.of(context).padding.top;
+
     return showDialog<void>(
       context: context,
       builder: (context) {
         return StatefulBuilder(builder: (context, setDialogState) {
-          return Center(
-            child: Container(
-              height: MediaQuery.of(context).size.height * 0.3,
-              child: AlertDialog(
-                scrollable: false,
-                title: const Text('Créer un joueur'),
-                content: Column(
+          return AnimatedPadding(
+            // Ajoutez un décalage basé sur la hauteur de la barre de statut et de la barre d'applications
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).viewInsets.top + statusBarHeight,
+            ),
+            duration: const Duration(milliseconds: 100),
+            child: AlertDialog(
+              title: const Text('Nouveau profil'),
+              content: SingleChildScrollView(
+                child: Column(
                   children: [
                     Row(
                       children: [
@@ -303,4 +328,5 @@ class HomeState extends State<Home> with TickerProviderStateMixin{
       },
     );
   }
+
 }
