@@ -5,6 +5,7 @@ import 'package:chessappmobile/controleurs/joueur_controleur.dart';
 import 'package:chessappmobile/controleurs/providers/utilisateur_provider.dart';
 import 'package:chessappmobile/database/database.dart';
 import 'package:chessappmobile/vues/chessboard.dart';
+import 'package:chessappmobile/vues/skins.dart';
 import 'package:chessappmobile/vues/stats.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -127,9 +128,8 @@ class HomeState extends State<Home> with TickerProviderStateMixin{
             ListTile(
               title: Text('Skins'),
               onTap: () {
-                // Add the logic to handle the "Skins" option
-                // Fermer le Drawer après avoir sélectionné une option
                 Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => Skins()));
               },
             ),
           // Vous pouvez ajouter d'autres options de menu ici
