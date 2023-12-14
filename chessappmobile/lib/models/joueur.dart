@@ -1,44 +1,53 @@
+class Joueur {
+  Joueur({
+    this.id,
+    required this.nameTag,
+    int? experience,
+    int? gamesplayed,
+    int? gameslost,
+    int? gameswon,
+    int? level,
+  }) {
+    this.experience = (experience ?? 0) % 100;
+    this.level = (experience != null) ? ((experience / 10).clamp(0, 1)).toInt() : null;
+    this.gamesplayed = gamesplayed;
+    this.gameswon = gameswon;
+    this.gameslost = gameslost;
+  }
 
+  int? id;
+  String nameTag;
 
-class Joueur{
+  int? gamesplayed;
+  int? gameswon;
+  int? gameslost;
+  int? experience;
 
-   Joueur({this.id, required this.nameTag,  this.experience,this.gamesplayed,this.gameslost,
-  this.gameswon, this.level});
+  int? level;
 
-   int? id;
-   String nameTag;
-
-   int? gamesplayed;
-   int? gameswon;
-   int? gameslost;
-   int? experience;
-
-   int? level;
-
-
-  Map<String, dynamic> toMap(){
+  Map<String, dynamic> toMap() {
     return {
-      'id' : id,
+      'id': id,
       'nametag': nameTag,
-      'gamesplayed' : gamesplayed,
-      'gameswon' : gameswon,
-      'gameslost' : gameslost,
-      'experience' : experience,
-      'level' : level
+      'gamesplayed': gamesplayed,
+      'gameswon': gameswon,
+      'gameslost': gameslost,
+      'experience': experience,
+      'level': level,
     };
   }
 
-  Joueur.fromMap(Map<String,dynamic> joueurMap):
-      this.id = joueurMap['id'],
-      this.nameTag = joueurMap['nametag'],
-      this.gamesplayed = joueurMap['gamesplayed'],
-      this.gameswon = joueurMap['gameswon'],
-      this.gameslost = joueurMap['gameslost'],
-      this.experience = joueurMap['experience'],
-      this.level = joueurMap['level'];
+  Joueur.fromMap(Map<String, dynamic> joueurMap)
+      : id = joueurMap['id'],
+        nameTag = joueurMap['nametag'],
+        gamesplayed = joueurMap['gamesplayed'],
+        gameswon = joueurMap['gameswon'],
+        gameslost = joueurMap['gameslost'],
+        experience = (joueurMap['experience'] ?? 0) % 100,
+        level = (joueurMap['experience'] != null) ? ((joueurMap['experience'] / 10).clamp(0, 1)).toInt() : null;
 
   @override
-  String toString(){
+  String toString() {
     return '$id: ' + '$nameTag';
   }
 }

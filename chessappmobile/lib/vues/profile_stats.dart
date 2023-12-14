@@ -72,7 +72,7 @@ class _ProfileStatsState extends State<ProfileStats> {
   }
 
   Widget buildStatProgress(String label, int value) {
-    double percentage = value / 100.0;
+    double percentage = value / 10.0;
 
     return Column(
       children: [
@@ -95,7 +95,7 @@ class _ProfileStatsState extends State<ProfileStats> {
 
 
   Widget buildStatCircularProgress(String label, int value) {
-    double percentage = value / 100.0;
+    double percentage = value / 10.0;
 
     return Column(
       children: [

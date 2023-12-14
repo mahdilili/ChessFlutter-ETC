@@ -96,14 +96,15 @@ class HomeState extends State<Home> with TickerProviderStateMixin{
 
 
   Widget _buildDrawer(BuildContext context) {
+    final utilisateurProvider = Provider.of<UtilisateurProvider>(context);
+
     return Drawer(
       child: ListView(
         children: [
-          Container(height: 100,
+          Container(
+            height: 100,
             child: DrawerHeader(
-
               decoration: BoxDecoration(
-
                 color: Colors.blue,
               ),
               child: Text(
@@ -119,22 +120,24 @@ class HomeState extends State<Home> with TickerProviderStateMixin{
             title: Text('Profile Stats'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (context)=> Stats()));
-               // Fermer le Drawer après avoir sélectionné une option
+              Navigator.push(context, MaterialPageRoute(builder: (context) => Stats()));
             },
           ),
-          ListTile(
-            title: Text('Skins'),
-            onTap: () {
-
-              // Fermer le Drawer après avoir sélectionné une option
-            },
-          ),
+          if (utilisateurProvider.isLoggedIn && utilisateurProvider.hasRole('admin'))
+            ListTile(
+              title: Text('Skins'),
+              onTap: () {
+                // Add the logic to handle the "Skins" option
+                // Fermer le Drawer après avoir sélectionné une option
+                Navigator.pop(context);
+              },
+            ),
           // Vous pouvez ajouter d'autres options de menu ici
         ],
       ),
     );
   }
+
 
   Future<void> _dialogCreateGame(BuildContext context) async{
     DatabaseHandler db = DatabaseHandler();
