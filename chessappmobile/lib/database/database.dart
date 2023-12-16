@@ -60,15 +60,19 @@ class DatabaseHandler{
     ''',
     '''
   INSERT INTO Role(id, role)
-  VALUES('1','admin');
+  VALUES
+  ('1','auth0|65774d0654430a4cfd99db0c','admin'),
+  ('2','auth0|657b234d05aa0f5efbbaedc6','user');
   ''',
     '''
-  INSERT INTO Utilisateur(id, nom)
-  VALUES('auth0|65774d0654430a4cfd99db0c', 'admin@chess.ca');
+  INSERT INTO Utilisateur(id, nom) VALUES
+  ('auth0|65774d0654430a4cfd99db0c', 'admin@chess.ca'),
+  ('auth0|657b234d05aa0f5efbbaedc6', 'user@chess.ca');
   ''',
     '''
-  INSERT INTO Role(id_utilisateur, role)
-  VALUES('auth0|65774d0654430a4cfd99db0c', 'admin');
+  INSERT INTO Role(id_utilisateur, role) VALUES
+  ('auth0|65774d0654430a4cfd99db0c', 'admin'),
+  ('auth0|657b234d05aa0f5efbbaedc6', 'user');
   '''
   ];
 
