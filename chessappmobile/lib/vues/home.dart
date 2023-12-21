@@ -3,8 +3,10 @@ import 'dart:io';
 
 import 'package:animated_background/animated_background.dart';
 import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-
+import 'package:geocoding/geocoding.dart';
 import '../controleurs/providers/utilisateur_provider.dart';
 import '../database/database.dart';
 import '../models/joueur.dart';
@@ -14,7 +16,7 @@ import '../vues/skins.dart';
 import '../vues/stats.dart';
 
 class Home extends StatefulWidget {
-  final String? selectedSkinPath; // New parameter for selected skin path
+  final String? selectedSkinPath;
 
   Home({Key? key, this.selectedSkinPath}) : super(key: key);
 
@@ -23,6 +25,15 @@ class Home extends StatefulWidget {
 }
 
 class HomeState extends State<Home> with TickerProviderStateMixin {
+
+  String? userCity;
+  bool isLoading = true;
+  bool gotpermission = false;
+  @override
+  void initState(){
+    super.initState();
+    _initLocation();
+  }
   @override
   Widget build(BuildContext context) {
     final utilisateurProvider = Provider.of<UtilisateurProvider>(context);
@@ -40,79 +51,106 @@ class HomeState extends State<Home> with TickerProviderStateMixin {
         ],
       ),
       drawer: _buildDrawer(context),
-      body: AnimatedBackground(
-        behaviour: RandomParticleBehaviour(
-          options: const ParticleOptions(
-              spawnMaxRadius: 50.00,
-              spawnMinSpeed: 10.00,
-              particleCount: 30,
-              spawnMaxSpeed: 50,
-              minOpacity: 0.3,
-              spawnOpacity: 0.4,
-              baseColor: Colors.white60),
-        ),
-        vsync: this,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              height: 70,
-              child: ElevatedButton(
-                style: ButtonStyle(
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18.0),
-                        side: BorderSide(color: Colors.white54)),
+      body:
+      RefreshIndicator(
+        onRefresh: _refreshData,
+        child: AnimatedBackground(
+          behaviour: RandomParticleBehaviour(
+            options: const ParticleOptions(
+                spawnMaxRadius: 50.00,
+                spawnMinSpeed: 10.00,
+                particleCount: 30,
+                spawnMaxSpeed: 50,
+                minOpacity: 0.3,
+                spawnOpacity: 0.4,
+                baseColor: Colors.white60),
+          ),
+          vsync: this,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                height: 70,
+                child: ElevatedButton(
+                  style: ButtonStyle(
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18.0),
+                          side: BorderSide(color: Colors.white54)),
+                    ),
+                  ),
+                  onPressed: () => _dialogCreateGame(context),
+                  child: Text(
+                    "Créer une nouvelle partie",
+                    style: TextStyle(fontSize: 25),
                   ),
                 ),
-                onPressed: () => _dialogCreateGame(context),
+              ),
+              SizedBox(height: 5),
+              Container(
+                height: 70,
+                child: ElevatedButton(
+                  style: ButtonStyle(
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18.0),
+                          side: BorderSide(color: Colors.white54)),
+                    ),
+                  ),
+                  onPressed: () => _dialogBuilder(context),
+                  child: Text(
+                    'Créer un profil joueur',
+                    style: TextStyle(fontSize: 25),
+                  ),
+                ),
+              ),
+              SizedBox(height: 5),
+              Container(
+                height: 70,
+                child: ElevatedButton(
+                  style: ButtonStyle(
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18.0),
+                          side: BorderSide(color: Colors.white54)),
+                    ),
+                  ),
+                  onPressed: () {
+                    if (Platform.isAndroid) {
+                      SystemNavigator.pop();
+                    } else if (Platform.isIOS) {
+                      exit(0);
+                    }
+                  },
+                  child: Text('Quitter', style: TextStyle(fontSize: 25)),
+                ),
+              ),
+              Container(
+                height: 70,
+                alignment: Alignment.center,
                 child: Text(
-                  "Créer une nouvelle partie",
-                  style: TextStyle(fontSize: 25),
-                ),
-              ),
-            ),
-            SizedBox(height: 5), // Espacement entre les boutons
-            Container(
-              height: 70,
-              child: ElevatedButton(
-                style: ButtonStyle(
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18.0),
-                        side: BorderSide(color: Colors.white54)),
+                  gotpermission
+                      ? userCity != null
+                      ? 'Ville: $userCity'
+                      : 'Chargement...'
+                      : 'Permission non accordée',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: gotpermission ? Colors.black : Colors.red,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 2.0,
+                        color: Colors.grey,
+                        offset: Offset(1.0, 1.0),
+                      ),
+                    ],
                   ),
                 ),
-                onPressed: () => _dialogBuilder(context),
-                child: Text(
-                  'Créer un profil joueur',
-                  style: TextStyle(fontSize: 25),
-                ),
               ),
-            ),
-            SizedBox(height: 5), // Espacement entre les boutons
-            Container(
-              height: 70,
-              child: ElevatedButton(
-                style: ButtonStyle(
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18.0),
-                        side: BorderSide(color: Colors.white54)),
-                  ),
-                ),
-                onPressed: () {
-                  if (Platform.isAndroid) {
-                    SystemNavigator.pop();
-                  } else if (Platform.isIOS) {
-                    exit(0);
-                  }
-                },
-                child: Text('Quitter', style: TextStyle(fontSize: 25)),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -157,7 +195,6 @@ class HomeState extends State<Home> with TickerProviderStateMixin {
                     context, MaterialPageRoute(builder: (context) => Skins()));
               },
             ),
-          // Vous pouvez ajouter d'autres options de menu ici
         ],
       ),
     );
@@ -269,7 +306,6 @@ class HomeState extends State<Home> with TickerProviderStateMixin {
                               ),
                             );
                           } else {
-                            // Afficher une alerte si les joueurs ne sont pas sélectionnés
                             _showAlert(context);
                           }
                         },
@@ -286,6 +322,47 @@ class HomeState extends State<Home> with TickerProviderStateMixin {
     );
   }
 
+
+  Future<void> _refreshData() async {
+    _initLocation();
+    await Future.delayed(Duration(seconds: 2));
+    return Future.value();
+  }
+  Future<void> _initLocation() async {
+    var status = await Permission.location.status;
+    if (status.isGranted) {
+      try {
+        Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+        );
+        List<Placemark> placemarks = await placemarkFromCoordinates(
+          position.latitude,
+          position.longitude,
+        );
+
+        String ville = placemarks.first.locality ?? "";
+        String province = placemarks.first.administrativeArea ?? "";
+        String pays = placemarks.first.country ?? "";
+        userCity = '$ville, $province, $pays';
+
+        setState(() {
+          isLoading = false;
+          gotpermission = true;
+        });
+      } catch (e) {
+        print("Erreur lors de l'obtention de la position de l'utilisateur: $e");
+      }
+    } else {
+      await Permission.location.request();
+      setState(() {
+        isLoading = false;
+        gotpermission = false;
+      });
+    }
+  }
+
+
+
   Future<void> _dialogBuilder(BuildContext context) async {
     DatabaseHandler db = DatabaseHandler();
     JoueurControleur jc = JoueurControleur();
@@ -300,7 +377,7 @@ class HomeState extends State<Home> with TickerProviderStateMixin {
       builder: (context) {
         return StatefulBuilder(builder: (context, setDialogState) {
           return AnimatedPadding(
-            // Ajoutez un décalage basé sur la hauteur de la barre de statut et de la barre d'applications
+
             padding: EdgeInsets.only(
               top: MediaQuery.of(context).viewInsets.top + statusBarHeight,
             ),
@@ -339,8 +416,6 @@ class HomeState extends State<Home> with TickerProviderStateMixin {
                               level: 0,
                             );
                             jc.sauvegarderJoueur(joueur);
-
-                            // Ajoutez ici le code pour fermer le dialogue après avoir créé le joueur si nécessaire
                             Navigator.of(context).pop();
                           },
                           child: const Text('Créer'),

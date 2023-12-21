@@ -68,7 +68,7 @@ class _StatsState extends State<Stats> {
                                                     );
                                                 },
 
-                                                // Ajoutez ici d'autres détails du joueur si nécessaire
+
                                             );
                                         },
                                     ),

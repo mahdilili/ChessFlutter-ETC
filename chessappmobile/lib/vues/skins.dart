@@ -12,10 +12,10 @@ class _SkinsState extends State<Skins> {
     "lib/images/board2.PNG",
     "lib/images/board3.PNG",
     "lib/images/default_board.PNG",
-    // Ajoutez ici les chemins d'accès à vos skins supplémentaires
+
   ];
 
-  String selectedSkinPath = ''; // Le chemin du skin sélectionné
+  String selectedSkinPath = '';
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class _SkinsState extends State<Skins> {
       ),
       body: Column(
         children: [
-          // Utiliser une ListView.builder pour afficher les images dans une liste scrollable
+
           Expanded(
             child: ListView.builder(
               itemCount: skinPaths.length,
@@ -56,7 +56,7 @@ class _SkinsState extends State<Skins> {
               },
             ),
           ),
-          // Bouton pour appliquer le skin sélectionné à la classe GameBoard
+
           ElevatedButton(
             onPressed: () {
               // TODO: Envoyer le chemin du skin à la classe GameBoard

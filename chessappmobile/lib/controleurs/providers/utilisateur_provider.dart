@@ -13,7 +13,8 @@ class UtilisateurProvider extends ChangeNotifier{
   Utilisateur? _utilisateur;
   late bool _isAuthenticating;
   late String _errorMessage;
-  
+
+
   List<Role>? get roles=>_utilisateur?.roles;
   
   bool get isAutheticating=> _isAuthenticating;

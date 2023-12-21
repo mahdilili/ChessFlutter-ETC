@@ -15,7 +15,7 @@ class Login extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.blue,
         image: DecorationImage(
-          image: AssetImage('lib/images/login_screen.jpg'), // Assurez-vous que le chemin est correct
+          image: AssetImage('lib/images/login_screen.jpg'),
           fit: BoxFit.fill,
         ),
       ),
@@ -31,17 +31,17 @@ class Login extends StatelessWidget {
                       .loginAction();
                 },
                 style: ElevatedButton.styleFrom(
-                  fixedSize: Size(200, 50), // Définissez la largeur et la hauteur souhaitées
+                  fixedSize: Size(200, 50),
                 ),
                 child: const Text("Login", style: TextStyle(fontSize: 20),),
               ),
-              SizedBox(height: 10), // Ajout d'un espace entre les boutons
+              SizedBox(height: 10),
               ElevatedButton(
                 onPressed: () {
                   exit(0);
                 },
                 style: ElevatedButton.styleFrom(
-                  fixedSize: Size(200, 50), // Définissez la largeur et la hauteur souhaitées
+                  fixedSize: Size(200, 50),
                 ),
                 child: const Text("Quitter", style: TextStyle(fontSize: 20),),
               ),
@@ -56,4 +56,8 @@ class Login extends StatelessWidget {
       ),
     );
   }
+
+
+
+
 }

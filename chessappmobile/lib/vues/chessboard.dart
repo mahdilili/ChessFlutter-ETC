@@ -64,7 +64,7 @@ void initState(){
 }
 
 void _initializeBoard(){
-    //initialiser le board avec des null
+
   List<List<ChessPiece?>> newBoard = List.generate(8, (index) =>List.generate(8, (index)=>null));
 
 
@@ -122,11 +122,9 @@ void PieceSelectionnee(int row, int col){
       selectedCol = col;
     }
 
-    // si il ya une piece selectionne et que le joueur clique sur un square valide, on bouge la piece
     else if(selectedPiece != null && validMoves.any((element) => element[0] == row && element[1] == col)){
       BougerPiece(row, col);
     }
-    //si une piece selectionnée, il faut calculer les moves valides
 
      validMoves = CalculerRealValidMoves(selectedRow,selectedCol,selectedPiece, true);
   });
@@ -331,20 +329,19 @@ void PieceSelectionnee(int row, int col){
     return playerMoves;
   }
 
-  //Calculer les vrai moves valides
   List<List<int>> CalculerRealValidMoves(int row, int col , ChessPiece? piecce, bool checkSimulation){
     List<List<int>> realValidMoves = [];
 
     List<List<int>> candidateMoves = CalculerRawValidMoves(row, col, piecce);
 
-    //filtrer les mouves qui peuvent génrer un check
+
 
     if(checkSimulation){
       for(var move in candidateMoves){
         int endRow = move[0];
         int endCol = move[1];
 
-        //simuler le prochain move pour déterminer s'il est safe ou pas
+
         if(simulatedMoveIsSafe(piecce!,row,col,endRow,endCol)){
           realValidMoves.add(move);
         }
