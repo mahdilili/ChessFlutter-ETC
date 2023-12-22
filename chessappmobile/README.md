@@ -19,7 +19,12 @@ harassant et aucune publicité.
 ### Protection de la vie privée:
 La protection de la vie privée des utilisateurs est au cœur du développement de Chess Mobile. Aucun comportement abusif évident, tel que le phishing ou l'utilisation des données personnelles. Ce jeu ne sauvegarde
 aucune donnée personnelles de ses utilisateurs et surtout les données personnelles des enfants.
-
+## Pour un déploiement sur Android : 
+1) Je dois créer un compte développeur sur Google Play Console et configurer l'application pour un déploiement sur Android.
+2) Génération d'une clé signature spécifique à l'application.
+3) Configuration du profil de publication dans Google Play Console.
+4) Soumission de l'application à l'examen sur Google Play Console en suivants les directives.
+5) Faire un suivi régulier sur le status de l'examen de l'application.
 
 ## Matrice intervenants/tâches :
 
