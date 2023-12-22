@@ -31,7 +31,7 @@ class Square extends StatelessWidget {
     Color? squareColor;
 
     if (isSelected) {
-      squareColor = Colors.lightBlue;
+      squareColor = Colors.teal;
     } else if (iswhitekingincheck &&
         piece?.PieceType == ChessPieceType.king &&
         !isWhite) {
@@ -43,7 +43,7 @@ class Square extends StatelessWidget {
       // Mettez en surbrillance la case en rouge si le roi noir est en échec
       squareColor = Colors.red;
     } else if (isValidMove) {
-      squareColor = Colors.yellow;
+      squareColor = Colors.lightGreen;
     } else {
       if(selectedPath!=null && selectedPath!.contains('/')) {
         int indexdebut = selectedPath!.lastIndexOf('/');

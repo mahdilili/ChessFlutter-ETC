@@ -137,25 +137,25 @@
     if(piecee == null){
       return [];
     }
-      //Les différentes direction selon la couleur du joueur
+
       int direction = piecee.isWhite? -1 : 1;
   
       switch (piecee.PieceType)
           {
         case ChessPieceType.pawn:
-      //pawn peut se déplacer en avant si le carré est vide
+
         if(bc.isInBoard(row+direction, col)&& board[row+direction][col]==null)
           {
             playerMoves.add([row+direction, col]);
           }
-        // pawn peut se déplcer de deux cases si ils sont dans leurs position initiales
+
         if((row == 1 && !piecee.isWhite) || (row ==6 && piecee.isWhite)){
           if(bc.isInBoard(row+2 * direction, col)&& board[row + 2 * direction][col]==null &&
               board[row + direction][col]==null){
             playerMoves.add([row+2*direction, col]);
           }
         }
-        // pawn peut manger une piece en diagonale
+
         if(bc.isInBoard(row+direction, col-1)&& board[row+direction][col-1] != null
         && board[row+direction][col-1]!.isWhite != piecee.isWhite){
           playerMoves.add([row+direction, col -1]);
@@ -544,8 +544,9 @@
     Widget build(BuildContext context) {
       return Scaffold(
         appBar: AppBar(title: const Text("Partie")),
-        backgroundColor: Colors.grey[600],
-        body: Column(
+        backgroundColor: Colors.white24,
+        body:
+        Column(
           children: [
 
             Expanded(
@@ -559,7 +560,7 @@
             Padding(
               padding: const EdgeInsets.only(right: 240),
               child: Text(
-                'Joueur noir ${widget.blackplayer!.substring(2,widget.blackplayer!.length) ?? "Non défini"}',
+                'Joueur noir:  ${widget.blackplayer!.substring(2,widget.blackplayer!.length) ?? "Non défini"}',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 18,
@@ -576,10 +577,10 @@
                   int row = index ~/ 8;
                   int col = index % 8;
   
-                  // Vérifier si le square est sélectionné ou pas
+
                   bool isSelected = selectedRow == row && selectedCol == col;
   
-                  // Vérifier si le square sélectionné est disponible
+
                   bool isValidMove = false;
                   for (var position in validMoves) {
                     // Comparer les colonnes et les rangées
@@ -602,9 +603,9 @@
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(right: 225,bottom: 40),
+              padding: const EdgeInsets.only(right: 225,bottom: 10),
               child: Text(
-                'Joueur Blanc ${widget.whitePlayer!.substring(2,widget.whitePlayer!.length) ?? "Non défini"}',
+                'Joueur blanc :${widget.whitePlayer!.substring(2,widget.whitePlayer!.length) ?? "Non défini"}',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 18,
@@ -618,6 +619,16 @@
                 itemBuilder: (context, index) => DeadPiece(imagePath: blackPiecesEaten[index].PathToImage, isWhite: false),
               ),
             ),
+
+              Text(
+                'Tour actuel : ${isWhiteTurn ? "Joueur Blanc" : "Joueur Noir"}',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+
+                ),
+              ),
+
           ],
         ),
       );
