@@ -10,7 +10,6 @@ class _SkinsState extends State<Skins> {
   List<String> skinPaths = [
     "lib/images/board1.PNG",
     "lib/images/board2.PNG",
-    "lib/images/board3.PNG",
     "lib/images/default_board.PNG",
 
   ];
@@ -57,14 +56,17 @@ class _SkinsState extends State<Skins> {
             ),
           ),
 
-          ElevatedButton(
-            onPressed: () {
-              // TODO: Envoyer le chemin du skin à la classe GameBoard
-              Navigator.pop(context);
-              Navigator.pop(context);
-              Navigator.push(context,MaterialPageRoute(builder: (context)=> Home(selectedSkinPath: selectedSkinPath,)));
-            },
-            child: Text('Appliquer le skin'),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 100),
+            child: ElevatedButton(
+              onPressed: () {
+                // TODO: Envoyer le chemin du skin à la classe GameBoard
+                Navigator.pop(context);
+                Navigator.pop(context);
+                Navigator.push(context,MaterialPageRoute(builder: (context)=> Home(selectedSkinPath: selectedSkinPath,)));
+              },
+              child: Text('Appliquer le skin'),
+            ),
           ),
         ],
       ),

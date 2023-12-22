@@ -11,7 +11,7 @@ class Square extends StatelessWidget {
   final bool iswhitekingincheck;
   final bool isblackkingincheck;
   final String? selectedPath;
-
+  final String? Skin;
   const Square({
     super.key,
     required this.isWhite,
@@ -23,6 +23,7 @@ class Square extends StatelessWidget {
     required this.onTap,
     required this.isValidMove,
     required this.selectedPath,
+    this.Skin
   });
 
   @override
@@ -55,6 +56,7 @@ class Square extends StatelessWidget {
         else if(skin == "board2"){
           squareColor = isWhite ? Colors.brown[400] : Colors.orange[500];
         }
+
         else {
           squareColor = isWhite ? Colors.grey[400] : Colors.grey[600];
         }
@@ -78,7 +80,7 @@ class Square extends StatelessWidget {
         child: piece != null
             ? Image.asset(
           piece!.PathToImage,
-          color: piece!.isWhite ? Colors.white : Colors.black,
+          color: piece!.isWhite  ? Colors.white : Colors.black,
         )
             : null,
       ),
