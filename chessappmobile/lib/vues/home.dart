@@ -14,6 +14,7 @@ import '../controleurs/joueur_controleur.dart';
 import '../vues/chessboard.dart';
 import '../vues/skins.dart';
 import '../vues/stats.dart';
+import 'package:restart_app/restart_app.dart';
 
 class Home extends StatefulWidget {
   final String? selectedSkinPath;
@@ -51,10 +52,7 @@ class HomeState extends State<Home> with TickerProviderStateMixin {
         ],
       ),
       drawer: _buildDrawer(context),
-      body:
-      RefreshIndicator(
-        onRefresh: _refreshData,
-        child: AnimatedBackground(
+      body: AnimatedBackground(
           behaviour: RandomParticleBehaviour(
             options: const ParticleOptions(
                 spawnMaxRadius: 50.00,
@@ -67,23 +65,60 @@ class HomeState extends State<Home> with TickerProviderStateMixin {
           ),
           vsync: this,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Container(
                 height: 70,
-                child: ElevatedButton(
-                  style: ButtonStyle(
-                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18.0),
-                          side: BorderSide(color: Colors.white54)),
+                alignment: Alignment.center,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.location_pin, color: Colors.white, size: 24),
+                    SizedBox(width: 8),
+                    Text(
+                      gotpermission
+                          ? userCity != null
+                          ? '$userCity'
+                          : 'Chargement...'
+                          : 'Permission non accordée',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: gotpermission ? Colors.white : Colors.red,
+                        shadows: [
+                          Shadow(
+                            blurRadius: 2.0,
+                            color: Colors.grey,
+                            offset: Offset(1.0, 1.0),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  onPressed: () => _dialogCreateGame(context),
-                  child: Text(
-                    "Créer une nouvelle partie",
-                    style: TextStyle(fontSize: 25),
+                  ],
+                ),
+
+              ),
+
+
+              Padding(
+                padding: const EdgeInsets.only(top:180),
+                child: Container(
+
+                  height: 70,
+                  child: ElevatedButton(
+                    style: ButtonStyle(
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18.0),
+                            side: BorderSide(color: Colors.white54)),
+                      ),
+                    ),
+                    onPressed: () => _dialogCreateGame(context),
+                    child: Text(
+                      "Créer une nouvelle partie",
+                      style: TextStyle(fontSize: 25),
+                    ),
                   ),
                 ),
               ),
@@ -126,34 +161,12 @@ class HomeState extends State<Home> with TickerProviderStateMixin {
                   child: Text('Quitter', style: TextStyle(fontSize: 25)),
                 ),
               ),
-              Container(
-                height: 70,
-                alignment: Alignment.center,
-                child: Text(
-                  gotpermission
-                      ? userCity != null
-                      ? 'Ville: $userCity'
-                      : 'Chargement...'
-                      : 'Permission non accordée',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: gotpermission ? Colors.black : Colors.red,
-                    shadows: [
-                      Shadow(
-                        blurRadius: 2.0,
-                        color: Colors.grey,
-                        offset: Offset(1.0, 1.0),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+
             ],
           ),
         ),
-      ),
-    );
+      );
+
   }
 
   Widget _buildDrawer(BuildContext context) {
@@ -323,11 +336,7 @@ class HomeState extends State<Home> with TickerProviderStateMixin {
   }
 
 
-  Future<void> _refreshData() async {
-    _initLocation();
-    await Future.delayed(Duration(seconds: 2));
-    return Future.value();
-  }
+
   Future<void> _initLocation() async {
     var status = await Permission.location.status;
     if (status.isGranted) {
@@ -349,11 +358,15 @@ class HomeState extends State<Home> with TickerProviderStateMixin {
           isLoading = false;
           gotpermission = true;
         });
+
       } catch (e) {
         print("Erreur lors de l'obtention de la position de l'utilisateur: $e");
       }
     } else {
       await Permission.location.request();
+
+
+      Restart.restartApp();
       setState(() {
         isLoading = false;
         gotpermission = false;
@@ -369,7 +382,7 @@ class HomeState extends State<Home> with TickerProviderStateMixin {
 
     final NameTagControleur = TextEditingController();
 
-    // Récupérez la hauteur de la barre de statut
+
     double statusBarHeight = MediaQuery.of(context).padding.top;
 
     return showDialog<void>(

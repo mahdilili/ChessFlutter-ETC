@@ -43,6 +43,8 @@ dependencies:
   geolocator: ^8.2.0
   geocoding: ^2.0.4
   permission_handler: ^11.0.1
+  restart_app: ^1.2.1
+
 
 dev_dependencies:
   flutter_test:
