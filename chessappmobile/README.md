@@ -20,11 +20,17 @@ harassant et aucune publicité.
 La protection de la vie privée des utilisateurs est au cœur du développement de Chess Mobile. Aucun comportement abusif évident, tel que le phishing ou l'utilisation des données personnelles. Ce jeu ne sauvegarde
 aucune donnée personnelles de ses utilisateurs et surtout les données personnelles des enfants.
 ## Pour un déploiement sur Android : 
-1) Je dois créer un compte développeur sur Google Play Console et configurer l'application pour un déploiement sur Android.
-2) Génération d'une clé signature spécifique à l'application.
-3) Configuration du profil de publication dans Google Play Console.
-4) Soumission de l'application à l'examen sur Google Play Console en suivants les directives.
-5) Faire un suivi régulier sur le status de l'examen de l'application.
+1) Ajout d'une icone pour l'application
+2) Activation du material components et ajout des deux thèmes. 
+2) Signature de l'application avec un certificat numérique et créer un keystore de téléchargement.
+3) Ajouter une référence du keystore à partir de l'application
+4) Ajouter les informations du keystore dans le fichier de propriétés.
+5) Réduction du code avec R8 et activer le support multidex
+6) Révision du fichier AndroidManifest.xml  et la configuration du fichier build.gradle
+7) Complation de l'application pour la publication (APK)
+8) Création du bundle d'application
+9) Installation de l'apk sur un appareil
+10) Publication sur le Google Play Store
 
 ## Matrice intervenants/tâches :
 

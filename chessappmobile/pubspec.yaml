@@ -58,11 +58,16 @@ dev_dependencies:
   flutter_lints: ^2.0.0
   mockito: ^5.4.2
   build_runner: ^2.4.6
+  flutter_launcher_icons:
   sqflite_common_ffi:
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
+flutter_icons:
+  anrdoid: "launcher_icon"
+  ios: true
+  image_path: "lib/images/icons/chess_icon.png"
 flutter:
 
   # The following line ensures that the Material Icons font is
