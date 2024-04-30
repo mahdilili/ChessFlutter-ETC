@@ -19,26 +19,5 @@ harassant et aucune publicité.
 ### Protection de la vie privée:
 La protection de la vie privée des utilisateurs est au cœur du développement de Chess Mobile. Aucun comportement abusif évident, tel que le phishing ou l'utilisation des données personnelles. Ce jeu ne sauvegarde
 aucune donnée personnelles de ses utilisateurs et surtout les données personnelles des enfants.
-## Pour un déploiement sur Android : 
-1) Ajout d'une icone pour l'application
-2) Activation du material components et ajout des deux thèmes. 
-2) Signature de l'application avec un certificat numérique et créer un keystore de téléchargement.
-3) Ajouter une référence du keystore à partir de l'application
-4) Ajouter les informations du keystore dans le fichier de propriétés.
-5) Réduction du code avec R8 et activer le support multidex
-6) Révision du fichier AndroidManifest.xml  et la configuration du fichier build.gradle
-7) Complation de l'application pour la publication (APK)
-8) Création du bundle d'application
-9) Installation de l'apk sur un appareil
-10) Publication sur le Google Play Store
-
-## Matrice intervenants/tâches :
-
-
-| Intervenant/Tâche                | Créer un profil joueur | Choisir un skin | Consulter la liste des joueurs | Consulter les statistiques d'un joueur | Créer et commencer une partie |
-|-----------------------------------|------------------------|-----------------|---------------------------------|-----------------------------------------|------------------|
-| Utilisateur                       | Au moins une fois. &nbsp; Durée d'environ une minute.&nbsp;Taux d'erreur très bas. Difficulté basse.                    | Indisponible               | Au moins une fois/sem. Durée d'environ une minute. Taux d'erreurs est très bas. Difficulté basse.                               |           Au moins une fois/jour. Durée d'environ 40 secondes. Difficulté très basse. Taux d'erreurs bas.                             |Au moins une fois par jour. Durée d'environ 15 minutes selon le joueur. Difficulté élevé. Taux d'erreurs moyen.      |            |
-| Administrateur                    | Une fois ou plus. Durée d'une minute. Taux d'erreurs très bas. Difficulté basse.                      | Au moins une fois (au besoin). Durée d'environ une minute. Taux d'erreurs très mineur. Aucune difficulté               | Au moins une fois par mois. Durée d'environ 2 minutes. Taux d'erreurs très bas. Difficulté basse aussi.                               | Au moins une fois par mois. Durée d'environ 1 minute. Difficulté basse. Taux d'erreurs très bas.                                       | Au moins une fois par 3 mois (lors des tests). Durée d'environ 20 minutes. Difficulté moyenne. Taux d'erreurs moyen                |
-
 
 
